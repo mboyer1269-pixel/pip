@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- BRAND.md 5.3: debug badge, a clementine disc with a cream "D", bottom-right inside the safe zone. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/ic_launcher_foreground" />
+    <item android:drawable="@drawable/ic_debug_badge" />
+</layer-list>

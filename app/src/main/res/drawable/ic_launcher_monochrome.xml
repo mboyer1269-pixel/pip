@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Themed icon layer: pocket outline, seed outline, leaf, two eye dots. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="2.5"
+        android:pathData="M61.69,50.39 L54,34 L46.31,50.39" />
+    <path android:fillColor="#FFFFFFFF"
+        android:pathData="M54,34 Q53.5,27 60,25.5 Q61,32 54,34 Z" />
+    <path android:fillColor="#FFFFFFFF"
+        android:pathData="M48.3,48.5 a1.9,1.9 0 1 0 3.8,0 a1.9,1.9 0 1 0 -3.8,0 Z M55.9,48.5 a1.9,1.9 0 1 0 3.8,0 a1.9,1.9 0 1 0 -3.8,0 Z" />
+    <path android:strokeColor="#FFFFFFFF" android:strokeWidth="2.5"
+        android:pathData="M35,52 L73,52 L73,70 A16,16 0 0 1 57,86 L51,86 A16,16 0 0 1 35,70 Z" />
+</vector>

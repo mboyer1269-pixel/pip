@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- BRAND.md section 5.2 -->
+<resources>
+    <color name="pip_indigo">#2F3A8F</color>
+    <color name="pip_clementine">#FF7A45</color>
+    <color name="pip_cream">#FFF4E8</color>
+    <color name="pip_seed">#7A4E2D</color>
+    <color name="pip_sprout">#2FA36B</color>
+    <color name="pip_ink">#1A1D33</color>
+    <color name="pip_coral_alert">#E5484D</color>
+</resources>

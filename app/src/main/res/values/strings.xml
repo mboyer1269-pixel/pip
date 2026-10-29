@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Pip, French first. Wording from BRAND.md section 4. -->
+<resources>
+    <string name="app_name" translatable="false">Pip</string>
+    <string name="slogan">Petit agent, grande poche</string>
+    <string name="greeting">Allô, moi c\'est Pip. Je loge dans ta poche — on y va quand tu veux.</string>
+    <string name="pip_stopped">Pip retourne dans la poche. À tantôt !</string>
+
+    <!-- S1 -->
+    <string name="state_ready">Pip est là.</string>
+    <string name="state_listening">Je t\'écoute…</string>
+    <string name="state_thinking">Je réfléchis…</string>
+    <string name="state_speaking">Je te réponds.</string>
+    <string name="state_waiting">Une tâche attend ton oui.</string>
+    <string name="state_error">Pip s\'est arrêté : %1$s.</string>
+    <string name="acp_connected">Orchestrateur : branché</string>
+    <string name="acp_connecting">Orchestrateur : branchement…</string>
+    <string name="acp_off">Orchestrateur : débranché</string>
+    <string name="last_task">Dernière tâche : %1$s — %2$s</string>
+    <string name="reminder_due">Rappel : %1$s</string>
+    <string name="action_stop">Arrêter</string>
+    <string name="action_open">Ouvrir</string>
+    <string name="action_see_task">Voir la tâche</string>
+    <string name="channel_status">État de Pip</string>
+    <string name="channel_reminders">Rappels et messages</string>
+    <string name="channel_tasks">Tâches à approuver</string>
+    <string name="notif_denied_explain">Sans notifications, je ne peux pas rester allumé : tu dois toujours voir que je suis là. Active-les dans Permissions.</string>
+    <plurals name="overdue_count">
+        <item quantity="one">%1$d rappel en retard dans ton carnet.</item>
+        <item quantity="other">%1$d rappels en retard dans ton carnet.</item>
+    </plurals>
+
+    <!-- S2 -->
+    <string name="turn_on">Allumer Pip</string>
+    <string name="turn_off">Arrêter Pip</string>
+    <string name="pip_off_hint">Pip est rangé. Allume-le pour jaser.</string>
+    <string name="talk">Parler</string>
+    <string name="talk_listening">J\'écoute — touche pour finir</string>
+    <string name="type_hint">Ou écris-moi ici…</string>
+    <string name="send">Envoyer</string>
+    <string name="screen_toggle">Regarde mon écran (cette fois-ci)</string>
+    <string name="screen_toggle_off_hint">Pour regarder ton écran, active Pip dans Accessibilité.</string>
+    <string name="see_snapshot">Voir ce que j\'ai lu</string>
+    <string name="snapshot_title">Ce que j\'ai lu</string>
+    <string name="interrupt">Touche pour me couper</string>
+    <string name="you_label">Toi</string>
+    <string name="pip_label">Pip</string>
+    <string name="indicator_brain_ready">Cerveau : prêt</string>
+    <string name="indicator_brain_missing">Cerveau : pas configuré</string>
+    <string name="indicator_screen_on">Écran : accessible</string>
+    <string name="indicator_screen_off">Écran : fermé</string>
+    <string name="orchestrator_message">Message de ton orchestrateur : %1$s</string>
+    <string name="err_no_key">Je n\'ai pas encore de clé pour mon cerveau. Ajoute-la dans Réglages › Cerveau.</string>
+    <string name="err_not_configured">Mon cerveau n\'est pas configuré : il faut une adresse https:// et un modèle dans Réglages › Cerveau.</string>
+    <string name="err_no_network">Pas de réseau en ce moment. Je réessaie quand tu veux.</string>
+    <string name="err_unreachable">Je n\'arrive pas à joindre le serveur. Vérifie l\'adresse dans Réglages › Cerveau.</string>
+    <string name="err_key_refused">Le serveur a refusé la clé. Vérifie-la dans Réglages › Cerveau.</string>
+    <string name="err_server">Le serveur a eu un pépin de son côté (%1$d). Réessaie dans un instant.</string>
+    <string name="err_timeout">Le serveur met trop de temps à répondre. On réessaie ?</string>
+    <string name="err_malformed">J\'ai reçu une réponse que je n\'arrive pas à lire.</string>
+    <string name="err_asr_missing">Je n\'ai pas de reconnaissance vocale sur l\'appareil. Tu peux m\'écrire, ou activer celle du système dans Réglages.</string>
+    <string name="err_asr_failed">Je n\'ai pas bien entendu. On réessaie ?</string>
+    <string name="err_mic_refused">Sans micro, écris-moi plutôt.</string>
+    <string name="err_no_other_app">Je ne vois pas d\'autre app à l\'écran à part moi. Mets-la à côté de Pip (écran partagé), puis redemande.</string>
+    <string name="err_screen_off">Pour regarder ton écran, active Pip dans Accessibilité.</string>
+    <string name="nav_settings">Réglages</string>
+    <string name="nav_notebook">Carnet</string>
+    <string name="nav_tasks">Tâches</string>
+    <string name="nav_journal">Journal</string>
+    <string name="nav_setup">Permissions</string>
+    <string name="nav_acp">Orchestrateur</string>
+
+    <!-- S3 -->
+    <string name="setup_title">Permissions</string>
+    <string name="setup_intro">Je te demande seulement ce qui sert. Tu peux dire non à tout sauf aux notifications.</string>
+    <string name="cap_notifications">Notifications</string>
+    <string name="cap_notifications_gives">Ma notification te montre que je suis là, avec Arrêter toujours à portée.</string>
+    <string name="cap_notifications_lost">Sans elle, je ne reste pas actif.</string>
+    <string name="cap_mic">Microphone</string>
+    <string name="cap_mic_gives">Tu me parles, je t\'entends.</string>
+    <string name="cap_mic_lost">Tu pourras m\'écrire.</string>
+    <string name="cap_a11y">Accessibilité</string>
+    <string name="cap_a11y_gives">Je lis ton écran quand tu me le demandes, jamais autrement.</string>
+    <string name="cap_a11y_lost">Je ne vois pas ton écran ; le reste marche.</string>
+    <string name="cap_network">Réseau</string>
+    <string name="cap_network_gives">Je parle à mon cerveau et à ton orchestrateur.</string>
+    <string name="cap_network_lost">Carnet et voix fonctionnent encore.</string>
+    <string name="allow">Autoriser</string>
+    <string name="open_settings">Ouvrir les réglages</string>
+    <string name="later">Plus tard</string>
+    <string name="granted">Accordé</string>
+    <string name="refused_state">Refusé</string>
+    <string name="if_refused">Si tu refuses : %1$s</string>
+
+    <!-- S4 -->
+    <string name="brain_title">Cerveau</string>
+    <string name="brain_url_label">Adresse du cerveau (https://)</string>
+    <string name="brain_url_refused">L\'adresse doit commencer par https://.</string>
+    <string name="brain_model_label">Modèle</string>
+    <string name="brain_key_label">Clé</string>
+    <string name="brain_key_saved">Clé : enregistrée</string>
+    <string name="brain_key_none">Clé : aucune</string>
+    <string name="brain_key_note">Une fois enregistrée, je ne te la montre plus.</string>
+    <string name="save">Enregistrer</string>
+    <string name="test">Tester</string>
+    <string name="clear_key">Effacer la clé</string>
+    <string name="saved">Enregistré.</string>
+    <string name="test_ok">Le cerveau répond. C\'est dans la poche.</string>
+    <string name="voice_section">Voix</string>
+    <string name="asr_opt_in">Utiliser la reconnaissance vocale du système. Attention : ton fournisseur peut traiter l\'audio hors de l\'appareil.</string>
+    <string name="speak_answers">Lire mes réponses à voix haute</string>
+    <string name="speech_lang_label">Langue d\'écoute</string>
+    <string name="lang_fr">Français</string>
+    <string name="lang_en">English</string>
+
+    <!-- S5 -->
+    <string name="acp_title">Orchestrateur</string>
+    <string name="acp_host_label">Orchestrateur</string>
+    <string name="acp_empty_allowlist">Aucun orchestrateur n\'est prévu dans cette version.</string>
+    <string name="acp_paired_since">Jumelé depuis le %1$s</string>
+    <string name="acp_not_paired">Pas jumelé</string>
+    <string name="pair">Jumeler</string>
+    <string name="repair">Rejumeler</string>
+    <string name="revoke">Révoquer</string>
+    <string name="connect">Brancher</string>
+    <string name="disconnect">Débrancher</string>
+    <string name="pairing_title">Code de jumelage</string>
+    <string name="pairing_text">Copie ce code dans ton orchestrateur. Je ne l\'afficherai qu\'une fois.</string>
+    <string name="repair_confirm">L\'ancien code ne marchera plus. On continue ?</string>
+    <string name="revoke_confirm">Je débranche et j\'oublie le code. Plus rien n\'entre avant un nouveau jumelage.</string>
+    <string name="acp_need_running">Allume Pip d\'abord.</string>
+    <string name="acp_need_pairing">Jumelle Pip d\'abord.</string>
+    <string name="acp_host_refused">Cet orchestrateur n\'est pas sur la liste de cette version.</string>
+    <string name="continue_">Continuer</string>
+    <string name="cancel">Annuler</string>
+    <string name="copy">Copier</string>
+    <string name="copied">Copié.</string>
+    <string name="done">OK</string>
+
+    <!-- S6 -->
+    <string name="notebook_title">Mon carnet</string>
+    <string name="kind_note">Note</string>
+    <string name="kind_promise">Promesse</string>
+    <string name="kind_reminder">Rappel</string>
+    <string name="notebook_empty">Ton carnet est vide. Il reste sur ton téléphone, chiffré.</string>
+    <string name="add">Ajouter</string>
+    <string name="edit">Modifier</string>
+    <string name="delete">Supprimer</string>
+    <string name="overdue">En retard depuis le %1$s</string>
+    <string name="due_on">Pour le %1$s</string>
+    <string name="erase_all">Tout effacer</string>
+    <string name="erase_all_confirm">J\'efface tout le carnet et sa clé. On ne pourra pas revenir en arrière.</string>
+    <string name="erased">Carnet vidé.</string>
+    <string name="entry_text_hint">Texte</string>
+    <string name="entry_due_hint">Échéance (AAAA-MM-JJ HH:MM), facultatif</string>
+    <string name="due_invalid">Je ne comprends pas cette date. Écris-la comme 2026-11-03 14:30.</string>
+    <string name="mark_done">Fait</string>
+    <string name="mark_undone">Pas fait</string>
+
+    <!-- S7 -->
+    <string name="approval_header">Pip attend ton oui — sans lui, rien ne bouge.</string>
+    <string name="approval_if_yes">Si tu dis oui : %1$s</string>
+    <string name="approval_orchestrator_says">L\'orchestrateur dit : « %1$s »</string>
+    <string name="approval_details">Détails complets</string>
+    <string name="approval_time_left">Il reste %1$s</string>
+    <string name="approve">Approuver</string>
+    <string name="refuse">Refuser</string>
+    <string name="approved">Approuvé. Je m\'en occupe.</string>
+    <string name="executed">Voilà, c\'est rangé dans la poche.</string>
+    <string name="refused">Refusé. Rien n\'a été fait.</string>
+    <string name="expired">Trop tard, la tâche a expiré. Rien n\'a été fait.</string>
+    <string name="approval_none">Aucune tâche n\'attend ton oui.</string>
+    <string name="desc_device_status">J\'envoie la version de Pip, la batterie, la recharge, le type de réseau et mon état.</string>
+    <string name="desc_snapshot_last">J\'envoie la dernière lecture d\'écran que toi as faite. Je n\'en fais pas de nouvelle.</string>
+    <string name="desc_message_show">J\'affiche ce message ici et dans une notification : « %1$s »</string>
+    <string name="desc_reminder_create">J\'ajoute un rappel à ton carnet : « %1$s », %2$s.</string>
+    <string name="no_date">sans date</string>
+
+    <!-- S8 -->
+    <string name="journal_title">Journal des tâches</string>
+    <string name="journal_empty">Rien encore. Tout ce qui arrive sera noté ici.</string>
+    <string name="ev_received">Reçue</string>
+    <string name="ev_pending">En attente</string>
+    <string name="ev_approved">Approuvée</string>
+    <string name="ev_refused">Refusée</string>
+    <string name="ev_expired">Expirée</string>
+    <string name="ev_rejected">Rejetée (%1$s)</string>
+    <string name="ev_executed">Exécutée</string>
+    <string name="ev_failed">Échouée</string>
+    <string name="ev_cancelled">Annulée</string>
+    <string name="cancelled_by_stop">Annulée : Pip a été arrêté.</string>
+    <string name="reason_bad_signature">signature invalide</string>
+    <string name="reason_wrong_agent">mauvais destinataire</string>
+    <string name="reason_stale">trop vieux</string>
+    <string name="reason_replay">déjà reçu</string>
+    <string name="reason_version">version inconnue</string>
+    <string name="reason_malformed">message illisible</string>
+    <string name="reason_not_paired">pas jumelé</string>
+    <string name="reason_unknown_task">tâche inconnue</string>
+    <string name="reason_forbidden_task">tâche interdite</string>
+    <string name="reason_bad_args">détails invalides</string>
+    <string name="reason_duplicate">déjà reçue</string>
+    <string name="clear_journal">Vider le journal</string>
+    <string name="clear_journal_confirm">J\'efface tout l\'historique des tâches. On continue ?</string>
+
+    <!-- S9 -->
+    <string name="excerpt_header">Ce bout de ton carnet m\'aiderait à répondre.</string>
+    <string name="excerpt_body">Voici exactement ce que j\'enverrais à mon cerveau, pour cette fois seulement :</string>
+    <string name="send_once">Envoyer cette fois</string>
+    <string name="dont_send">Ne pas envoyer</string>
+    <string name="excerpt_refused">D\'accord, je réponds sans.</string>
+
+    <!-- Accessibility service -->
+    <string name="a11y_label">Pip — lecture d\'écran</string>
+    <string name="a11y_description">Pip lit le contenu de l\'écran seulement quand tu le lui demandes, pour un tour. Pip ne touche à rien : pas de clic, pas de saisie, pas de capture d\'image. Les champs de mot de passe sont ignorés.</string>
+</resources>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.Pip" parent="android:Theme.Material.Light">
+        <item name="android:colorPrimary">@color/pip_indigo</item>
+        <item name="android:colorPrimaryDark">@color/pip_indigo</item>
+        <item name="android:colorAccent">@color/pip_clementine</item>
+        <item name="android:windowBackground">@color/pip_cream</item>
+        <item name="android:textColorPrimary">@color/pip_ink</item>
+        <item name="android:statusBarColor">@color/pip_indigo</item>
+    </style>
+</resources>

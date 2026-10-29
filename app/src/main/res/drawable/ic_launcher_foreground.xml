@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- BRAND.md 5.1/5.3: a seed with eyes and a leaf, peeking out of a pocket. Original drawing. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <!-- Seed (drawn first, the pocket covers its lower half) -->
+    <path android:fillColor="@color/pip_seed"
+        android:pathData="M54,34 L61.69,50.39 A8.5,8.5 0 1 1 46.31,50.39 Z" />
+    <!-- Leaf -->
+    <path android:fillColor="@color/pip_sprout"
+        android:pathData="M54,34 Q53.5,27 60,25.5 Q61,32 54,34 Z" />
+    <!-- Eyes -->
+    <path android:fillColor="@color/pip_ink"
+        android:pathData="M48.3,48.5 a1.9,1.9 0 1 0 3.8,0 a1.9,1.9 0 1 0 -3.8,0 Z M55.9,48.5 a1.9,1.9 0 1 0 3.8,0 a1.9,1.9 0 1 0 -3.8,0 Z" />
+    <path android:fillColor="@color/pip_cream"
+        android:pathData="M50.3,47.8 a0.6,0.6 0 1 0 1.2,0 a0.6,0.6 0 1 0 -1.2,0 Z M57.9,47.8 a0.6,0.6 0 1 0 1.2,0 a0.6,0.6 0 1 0 -1.2,0 Z" />
+    <!-- Pocket -->
+    <path android:fillColor="@color/pip_cream"
+        android:pathData="M35,52 L73,52 L73,70 A16,16 0 0 1 57,86 L51,86 A16,16 0 0 1 35,70 Z" />
+    <!-- Stitch line -->
+    <path android:fillColor="@color/pip_clementine"
+        android:pathData="M39,55.5h2v1h-2z M43,55.5h2v1h-2z M47,55.5h2v1h-2z M51,55.5h2v1h-2z M55,55.5h2v1h-2z M59,55.5h2v1h-2z M63,55.5h2v1h-2z M67,55.5h2v1h-2z " />
+</vector>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Every permission below has a line in PERMISSIONS.md (SEC-6). -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
+    <!-- Package visibility for the speech and TTS engines only (no package listing). -->
+    <queries>
+        <intent>
+            <action android:name="android.speech.RecognitionService" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
+    </queries>
+
+    <application
+        android:name=".PipApp"
+        android:allowBackup="false"
+        android:fullBackupContent="false"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Pip">
+
+        <!-- Launcher: exported because Android requires it to be started from the home screen. -->
+        <activity
+            android:name=".ui.MainActivity"
+            android:exported="true"
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".ui.SetupActivity" android:exported="false" />
+        <activity android:name=".ui.BrainSettingsActivity" android:exported="false" />
+        <activity android:name=".ui.AcpSettingsActivity" android:exported="false" />
+        <activity android:name=".ui.NotebookActivity" android:exported="false" />
+        <activity android:name=".ui.TaskApprovalActivity" android:exported="false" android:launchMode="singleTop" />
+        <activity android:name=".ui.JournalActivity" android:exported="false" />
+
+        <!-- FR-1.5: type chosen in README "Foreground service type". -->
+        <service
+            android:name=".service.PipService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Personal assistant the owner turns on; visible notification with Stop; keeps the owner-approved task channel and reminders running." />
+        </service>
+
+        <!-- Read-only screen context (V1-3). Exported for the system to bind it;
+             only holders of BIND_ACCESSIBILITY_SERVICE (the system) can. -->
+        <service
+            android:name=".screen.PipAccessibilityService"
+            android:exported="true"
+            android:label="@string/a11y_label"
+            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
+            <intent-filter>
+                <action android:name="android.accessibilityservice.AccessibilityService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accessibilityservice"
+                android:resource="@xml/accessibility_config" />
+        </service>
+    </application>
+</manifest>
