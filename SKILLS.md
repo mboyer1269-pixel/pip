@@ -37,6 +37,15 @@ REA is absent, so the inspection uses the explicit fallback: **jadx** and
 | `aapt`, `aapt2`, `apksigner`, `adb` | Absent | `command -v` returns nothing (no Android SDK) |
 | `gitleaks` | Present (installed this session, Phase 3) | `gitleaks_8.21.2_linux_x64.tar.gz` from the official GitHub release, sha256 `5bc41815076e6ed6ef8fbecc9d9b75bcae31f39029ceb55da08086315316e3ba`, `version` → `8.21.2`, at `/usr/local/bin/gitleaks`; a fresh session must reinstall it |
 
+## Project skills (vendored in `.claude/skills/`)
+
+Five skills from Google's official Android skills repository
+(`https://github.com/android/skills`, commit `6daa53ef27fa2aa87827d183a85c06cedceca833`,
+Apache 2.0), copied unmodified after review: `android-permissions-security`,
+`android-intent-security`, `testing-setup`, `anr-audit-and-fix`, `r8-analyzer`.
+Details and rationale in `.claude/skills/README.md`. They load in any session
+started on this repository.
+
 ## Other tools present that matter to this project
 
 | Tool | Use |
