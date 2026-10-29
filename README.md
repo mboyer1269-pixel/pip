@@ -147,6 +147,82 @@ URL ending in `/v1`).
 | T-11 Host / https refusal | `HostPolicyTest` |
 | T-12 Permissions documented | `scripts/check-permissions.sh` |
 
+## ACP doctrine and hardening (Phase 6)
+
+Where each rule of SPEC section 7 and section 8 lives. Proof by test where a
+test exists; the Android-only rules are checked on the device in Phase 7.
+
+### Network and manifest
+
+| Rule | Where |
+|---|---|
+| SEC-1 no cleartext, no exception | `app/src/main/res/xml/network_security_config.xml:4`, `app/src/main/AndroidManifest.xml:28` |
+| SEC-4 no backup, no device transfer | `AndroidManifest.xml:24`, `AndroidManifest.xml:26` → `res/xml/data_extraction_rules.xml` |
+| SEC-4 exported components | only `AndroidManifest.xml:38` (launcher) and the accessibility service, protected by `AndroidManifest.xml:69`; see `PERMISSIONS.md` |
+| ACP-2 `wss://` only | `core/.../acp/AcpHostPolicy.kt:20`, enforced again at `app/.../acp/AcpConnection.kt:38` |
+| ACP-3 build-time allowlist | `app/build.gradle.kts:20` (empty until Q-1), checked before connecting at `app/.../PipRuntime.kt:101` |
+| ACP-4 / SEC-2 no listening port | No server socket anywhere in the tree (`grep -rnE "ServerSocket\|LocalServerSocket"` → nothing) |
+| No redirect follow on the ACP socket | `app/.../acp/AcpConnection.kt:29` |
+| SEC-5 release minify + shrink, debug separate | `app/build.gradle.kts:30`, `app/build.gradle.kts:36` |
+
+The network security config cannot list the orchestrator domain yet: SPEC
+Q-1 is open. The brain host is entered by the owner on the device (FR-4.1),
+so it cannot be listed at build time either; it is held to `https://` by
+`BrainUrl.normalize` and the global no-cleartext rule.
+
+### Per-task approval (ACP-5 to ACP-10)
+
+| Rule | Where | Test |
+|---|---|---|
+| Every task enters pending | `core/.../acp/TaskBroker.kt:67` | `AcpScenarioTest.approved` |
+| Runs only after Approve, once | `TaskBroker.kt:100` | `AcpScenarioTest.approved`, `TaskBrokerTest.approvedTaskRunsExactlyOnce` |
+| Refuse runs nothing | `TaskBroker.kt:121` | `AcpScenarioTest.refused` |
+| 5 minutes → expired | `TaskBroker.kt:130`, `TaskBroker.kt:181` | `AcpScenarioTest.expired` (fake clock) |
+| One task, one decision; no batch, no "always" | method signatures take one `taskId`; S7 has only Approve / Refuse | `AcpScenarioTest.oneDecisionPerTaskNoBatch` |
+| Every decision sent back, signed | `TaskBroker.kt:162`, `core/.../acp/AcpSigner.kt:43` | peer-side signature check in every `AcpScenarioTest` case |
+| Stop cancels pending tasks | `TaskBroker.kt:143` | `TaskBrokerTest.stopCancelsEveryPendingTask` |
+| Approve armed only after 1 s on screen; taps through overlays refused | `app/.../ui/TaskApprovalActivity.kt:106`, `app/.../ui/Ui.kt:45` | device check |
+
+### Integrity (ACP-11 to ACP-14)
+
+| Rule | Where | Test |
+|---|---|---|
+| Verify before reading the body | `core/.../acp/EnvelopeVerifier.kt:27` | `AcpVerifierTest` |
+| Constant-time compare | `core/.../acp/AcpSigner.kt:33` | `AcpVerifierTest.rejectsBadSignature` |
+| `agent_id` must be `pip` | `core/.../acp/Envelope.kt:38` | `AcpVerifierTest.rejectsWrongAgent` |
+| 120 s freshness, replay window | `EnvelopeVerifier.kt:59` | `AcpVerifierTest.rejectsStaleAndFutureTimestamps`, `rejectsReplayedNonceAndMsgId` |
+| Canonical form | `core/.../acp/CanonicalJson.kt:19` | `CanonicalJsonTest` |
+| Unauthenticated frames get no reply | `TaskBroker.onEnvelopeRejected` sends nothing | `AcpScenarioTest.unauthenticatedFramesGetNoReply` |
+| Pairing: 32 random bytes, shown once, sealed | `app/.../ui/AcpSettingsActivity.kt:90`, `app/.../security/SecretStore.kt:21` | device check |
+| Screenshots blocked on the pairing view | `AcpSettingsActivity.kt:33` | device check |
+| Copied code cleared from the clipboard after 60 s if still Pip's | `AcpSettingsActivity.kt:121` | device check |
+| Re-pair rotates; revoke rejects everything | `AcpSettingsActivity.kt:90`, `AcpSettingsActivity.kt:125` | `AcpScenarioTest.rePairingRotatesAndRevokeRejectsEverything` |
+
+### Closed intent list (SPEC 7.5)
+
+`core/.../acp/Intents.kt:33` declares exactly `device.status`,
+`snapshot.last`, `message.show`, `reminder.create`. The executor
+(`app/.../acp/DeviceTaskExecutor.kt:25`) is an exhaustive `when` over that
+sealed type: there is no code path for anything else. Names that look like
+shell, free-form intent or URL, remote capture, SMS or calls are rejected as
+"forbidden" (`Intents.kt:45`), everything else unknown as "unknown"; both are
+journaled and answered `rejected`. Tests: `AcpScenarioTest.closedListIsExactlyFourIntents`,
+`TaskBrokerTest.unknownAndForbiddenIntentsAreRejected`.
+
+### Journal (ACP-16, ACP-17)
+
+Event kinds `core/.../journal/Journal.kt:6`; file writer
+`app/.../journal/FileJournal.kt:24` stores time, kind, task id, intent and a
+fixed-wording reason only; shown on S8 (`app/.../ui/JournalActivity.kt:15`).
+
+### Secrets (SEC-3, SEC-7, SEC-8)
+
+- Keys: AES-256-GCM in Android Keystore, `app/.../security/KeystoreKeys.kt:21`.
+- Gate: `scripts/clean-room-gate.sh` checks credential assignments, private
+  key headers, common provider key shapes, bearer literals, signing files and
+  `local.properties`, plus gitleaks when installed. No `Log` call exists in
+  the app or core sources.
+
 ## Open points
 
 - **Q-1** (SPEC): orchestrator hostname. Until answered,

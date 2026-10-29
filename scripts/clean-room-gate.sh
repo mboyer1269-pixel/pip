@@ -33,6 +33,13 @@ check "product name"   --exclude=INSPECTION-LOG.md "$name"
 check "publisher"      --exclude=INSPECTION-LOG.md "$publisher"
 check "wildcard bind"  "0\.0\.0\.0"
 check "secrets"        "(api[_-]?key|secret|token|password)\s*=\s*\"[^\"]+\""
+# Known credential shapes, assembled from fragments so this file never matches itself.
+pk="PRIVATE"" KEY-----"
+check "private key"    -e "-----BEGIN [A-Z ]*$pk"
+check "provider keys"  -e "(s""k-[A-Za-z0-9_-]{20,}|gh""p_[A-Za-z0-9]{30,}|github_p""at_[A-Za-z0-9_]{30,}|AK""IA[0-9A-Z]{16}|AI""za[0-9A-Za-z_-]{35}|xox""[baprs]-[A-Za-z0-9-]{10,})"
+check "bearer literal" -e "Bearer [A-Za-z0-9._-]{20,}"
+signing="$(find . -path ./.git -prune -o \( -name '*.jks' -o -name '*.keystore' -o -name '*.p12' -o -name 'local.properties' \) -print)"
+if [ -n "$signing" ]; then echo "FAIL [signing or local files]"; echo "$signing"; fail=1; else echo "ok   [signing or local files]"; fi
 apks="$(find . -path ./.git -prune -o -name '*.apk' -print)"
 if [ -n "$apks" ]; then echo "FAIL [apk in tree]"; echo "$apks"; fail=1; else echo "ok   [apk in tree]"; fi
 

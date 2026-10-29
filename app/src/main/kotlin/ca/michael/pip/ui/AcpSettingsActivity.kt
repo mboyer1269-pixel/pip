@@ -6,6 +6,8 @@ import android.content.ClipData
 import android.content.ClipDescription
 import android.content.ClipboardManager
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.os.PersistableBundle
 import android.view.WindowManager
 import android.widget.LinearLayout
@@ -111,8 +113,13 @@ class AcpSettingsActivity : Activity() {
         val clip = ClipData.newPlainText("pip", code)
         // Marks the clip as sensitive so the system does not preview it.
         clip.description.extras = PersistableBundle().apply { putBoolean(ClipDescription.EXTRA_IS_SENSITIVE, true) }
-        getSystemService(ClipboardManager::class.java).setPrimaryClip(clip)
+        val clipboard = applicationContext.getSystemService(ClipboardManager::class.java)
+        clipboard.setPrimaryClip(clip)
         Toast.makeText(this, R.string.copied, Toast.LENGTH_SHORT).show()
+        // The code should not outlive its use: clear it after 60 s if the clip is still ours.
+        Handler(Looper.getMainLooper()).postDelayed({
+            if (clipboard.primaryClip?.getItemAt(0)?.text?.toString() == code) clipboard.clearPrimaryClip()
+        }, CLIPBOARD_CLEAR_MS)
     }
 
     private fun revoke() {
@@ -131,6 +138,10 @@ class AcpSettingsActivity : Activity() {
         }
         message?.let { Toast.makeText(this, it, Toast.LENGTH_LONG).show() }
         render()
+    }
+
+    private companion object {
+        const val CLIPBOARD_CLEAR_MS = 60_000L
     }
 
     private fun confirm(message: Int, action: () -> Unit) {

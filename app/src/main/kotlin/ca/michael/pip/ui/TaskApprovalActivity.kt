@@ -42,6 +42,7 @@ class TaskApprovalActivity : Activity() {
     override fun onResume() {
         super.onResume()
         pip.broker.addListener(onBroker)
+        shownTaskId = null
         render()
         handler.post(countdown)
     }
@@ -72,9 +73,12 @@ class TaskApprovalActivity : Activity() {
         column.addView(Ui.text(this, pretty.encodeToString(JsonElement.serializer(), task.args), 13f).apply { setTextIsSelectable(true) })
         timeLeft = Ui.text(this, "", 15f, bold = true).also { column.addView(it) }
         updateTimeLeft()
+        val approve = Ui.button(this, getString(R.string.approve), Ui.Style.PRIMARY) { decide(task, approve = true) }
+        approve.isEnabled = false
+        handler.postDelayed({ approve.isEnabled = true }, ARM_DELAY_MS)
         column.addView(Ui.row(this,
             Ui.button(this, getString(R.string.refuse), Ui.Style.DANGER) { decide(task, approve = false) },
-            Ui.button(this, getString(R.string.approve), Ui.Style.PRIMARY) { decide(task, approve = true) },
+            approve,
         ))
     }
 
@@ -95,6 +99,11 @@ class TaskApprovalActivity : Activity() {
         val ms = pip.broker.timeLeftMs(task)
         val s = ms / 1000
         timeLeft?.text = getString(R.string.approval_time_left, String.format("%d:%02d", s / 60, s % 60))
+    }
+
+    private companion object {
+        /** A task must be visible this long before Approve accepts a tap. */
+        const val ARM_DELAY_MS = 1_000L
     }
 
     /** Pip's own description of exactly what will happen (BRAND.md S7). */
