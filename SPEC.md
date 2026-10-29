@@ -291,8 +291,8 @@ Implemented exactly as stated; nothing added.
   signature does not verify (constant-time compare); `agent_id` is not
   `pip`; `ts` is outside the freshness window; the `nonce` or `msg_id` was
   already seen within that window; `v` is unsupported; the JSON is
-  malformed. Freshness window: **spec value 120 seconds** either way (owner
-  may change). Each rejection is journaled.
+  malformed. Freshness window: **120 seconds** either way (confirmed by
+  the owner, Q-3). Each rejection is journaled.
 - ACP-13 Pairing: on the device, the owner taps Pair; Pip generates a
   32-byte random secret, shows it once for the owner to enter into the
   orchestrator, and stores it encrypted (SEC-3). The screen showing it MUST
@@ -390,11 +390,11 @@ are inherited from anywhere; Phase B sets them and lists them in the README.
 - Phase B never consults the inspected application (two-hats gate in
   `CLAUDE.md`).
 
-## 12. Open questions for the owner
+## 12. Owner questions
 
-| ID | Question | Needed by |
+| ID | Question | Status |
 |---|---|---|
-| Q-1 | Orchestrator hostname for the build allowlist (ACP-3) | Phase 6 |
-| Q-2 | Confirm: no overlay permission in v1 (section 5) — this removes the overlay step from the install instructions | Phase 5 |
-| Q-3 | Confirm the 120-second freshness window (ACP-12) | Phase 6 |
-| Q-4 | Confirm FR-2.2: on-device recognizer first, system recognizer only with opt-in | Phase 5 |
+| Q-1 | Orchestrator hostname for the build allowlist (ACP-3) | **Open** — needed by Phase 6; until answered the allowlist is empty and the ACP client refuses to connect |
+| Q-2 | No overlay permission in v1 (section 5); the overlay step is removed from the install instructions | **Confirmed by owner, 2026-10-29** |
+| Q-3 | Freshness window of 120 seconds (ACP-12) | **Confirmed by owner, 2026-10-29** |
+| Q-4 | On-device recognizer first; system recognizer only after a one-time opt-in (FR-2.2) | **Confirmed by owner, 2026-10-29** |
