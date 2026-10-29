@@ -223,6 +223,54 @@ fixed-wording reason only; shown on S8 (`app/.../ui/JournalActivity.kt:15`).
   `local.properties`, plus gitleaks when installed. No `Log` call exists in
   the app or core sources.
 
+## Build in CI (Phase 7)
+
+`.github/workflows/android.yml` runs on every push and pull request:
+Gradle wrapper validation → gitleaks install (official release, sha256
+pinned) → `scripts/clean-room-gate.sh` → `scripts/check-permissions.sh` on
+the source manifest → `:core:test` → `assembleDebug` →
+`scripts/check-permissions.sh` on the **merged** manifest → APK listing and
+`sha256sum` → artifact `pip-debug-apk` (APK + `apk-sha256.txt`, kept 7 days).
+The APK is never committed (`.gitignore`, gate check "apk in tree").
+
+## Install on the owner's phone (debug build)
+
+1. On GitHub: **Actions → android → the latest green run → Artifacts →
+   `pip-debug-apk`**. Unzip it; check the APK against `apk-sha256.txt`
+   (`sha256sum -c apk-sha256.txt` from the unzipped folder).
+2. Install, either:
+   - **USB:** turn on Developer options and USB debugging on the phone, then
+     `adb install -r app-debug.apk`; or
+   - **On the phone:** open the APK from Files and allow "Install unknown
+     apps" for that Files app only, then turn it back off.
+3. Open **Pip (debug)** (icon with the small "D" badge).
+4. **Permissions** (S3): allow notifications (required). Microphone and
+   Accessibility are optional; for Accessibility, Pip opens the system screen
+   — turn on "Pip — lecture d'écran". No overlay permission exists in v1
+   (SPEC Q-2).
+5. **Réglages › Cerveau** (S4): `https://` address of an OpenAI-compatible
+   endpoint (base ending for example in `/v1`), model name, key. Tap
+   **Tester**.
+6. Back on Home, tap **Allumer Pip**: the notification with **Arrêter**
+   appears. Tap **Parler** or type.
+7. ACP stays off until the orchestrator host is set at build time (SPEC Q-1).
+
+## Final checklist (Phase 7)
+
+| Item | Status |
+|---|---|
+| Clean-room gate exit 0 (local) | yes — see Phase 7 report |
+| Clean-room gate + gitleaks exit 0 (CI) | see the CI run |
+| Core unit tests green | 37/37 locally; re-run in CI |
+| Debug APK built, path + size + sha256 | CI only (no local Android SDK) |
+| Every merged-manifest permission in `PERMISSIONS.md` | CI step |
+| `allowBackup=false`, data extraction excluded | `AndroidManifest.xml:24`, `:26` |
+| No cleartext | `network_security_config.xml:4`, `AndroidManifest.xml:28` |
+| Components not exported except launcher + accessibility service | `PERMISSIONS.md` |
+| Release minify + shrink; debug id suffix, label, badge | `app/build.gradle.kts`, `app/src/debug/res/` |
+| No APK, keystore or `local.properties` in the tree | gate |
+| Device checks still to do by the owner | T-1 Stop, T-3 prefs files, T-4 erase-all key deletion, Approve arm delay, pairing screenshot block |
+
 ## Open points
 
 - **Q-1** (SPEC): orchestrator hostname. Until answered,
