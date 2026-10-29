@@ -17,7 +17,8 @@ import kotlin.test.assertTrue
 class BrainClientTest {
     private class Recorder(var reply: () -> HttpResponse) : HttpTransport {
         var calls = 0
-        override fun postJson(url: String, headers: Map<String, String>, body: String): HttpResponse { calls++; return reply() }
+        var lastBody = ""
+        override fun postJson(url: String, headers: Map<String, String>, body: String): HttpResponse { calls++; lastBody = body; return reply() }
         override fun cancel() {}
     }
 
@@ -43,6 +44,22 @@ class BrainClientTest {
             BrainResult.Answer("Allô !"),
             run { HttpResponse(200, """{"choices":[{"message":{"role":"assistant","content":" Allô ! "}}]}""") },
         )
+    }
+
+    @Test fun requestCarriesAnAnswerCap() {
+        val t = Recorder { HttpResponse(200, """{"choices":[{"message":{"content":"ok"}}]}""") }
+        BrainClient(t) { true }.ask(good, msgs)
+        assertTrue("\"max_tokens\":1024" in t.lastBody)
+    }
+
+    @Test fun serverReasonIsShownWithKeyMasked() {
+        val body = """{"type":"error","error":{"type":"invalid_request_error","message":"bad request for key k: model x"}}"""
+        val r = BrainClient(Recorder { HttpResponse(400, body) }) { true }.ask(good.copy(key = "SECRET-123"), msgs)
+        assertEquals(BrainResult.ServerError(400, "bad request for key k: model x"), r)
+        val leaky = """{"error":{"message":"invalid key SECRET-123"}}"""
+        val r2 = BrainClient(Recorder { HttpResponse(400, leaky) }) { true }.ask(good.copy(key = "SECRET-123"), msgs)
+        assertEquals(BrainResult.ServerError(400, "invalid key [clé]"), r2)
+        assertEquals(BrainResult.ServerError(502, null), BrainClient(Recorder { HttpResponse(502, "<html>") }) { true }.ask(good, msgs))
     }
 
     @Test fun turnSendsOnlyWhatWasAttached() {

@@ -56,6 +56,7 @@
     <string name="err_unreachable">Je n\'arrive pas à joindre le serveur. Vérifie l\'adresse dans Réglages › Cerveau.</string>
     <string name="err_key_refused">Le serveur a refusé la clé. Vérifie-la dans Réglages › Cerveau.</string>
     <string name="err_server">Le serveur a eu un pépin de son côté (%1$d). Réessaie dans un instant.</string>
+    <string name="err_server_detail">Le serveur a refusé la demande (%1$d) : %2$s</string>
     <string name="err_timeout">Le serveur met trop de temps à répondre. On réessaie ?</string>
     <string name="err_malformed">J\'ai reçu une réponse que je n\'arrive pas à lire.</string>
     <string name="err_asr_missing">Je n\'ai pas de reconnaissance vocale sur l\'appareil. Tu peux m\'écrire, ou activer celle du système dans Réglages.</string>

@@ -111,7 +111,8 @@ class BrainSettingsActivity : Activity() {
                 BrainResult.NoNetwork -> getString(R.string.err_no_network)
                 BrainResult.Unreachable -> getString(R.string.err_unreachable)
                 is BrainResult.KeyRefused -> getString(R.string.err_key_refused)
-                is BrainResult.ServerError -> getString(R.string.err_server, result.code)
+                is BrainResult.ServerError -> result.detail?.let { getString(R.string.err_server_detail, result.code, it) }
+                ?: getString(R.string.err_server, result.code)
                 BrainResult.Timeout -> getString(R.string.err_timeout)
                 BrainResult.Malformed -> getString(R.string.err_malformed)
                 BrainResult.Cancelled -> ""

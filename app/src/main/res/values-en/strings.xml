@@ -53,6 +53,7 @@
     <string name="err_unreachable">I can\'t reach the server. Check the address in Settings › Brain.</string>
     <string name="err_key_refused">The server refused the key. Check it in Settings › Brain.</string>
     <string name="err_server">The server had a hiccup on its side (%1$d). Try again in a moment.</string>
+    <string name="err_server_detail">The server refused the request (%1$d): %2$s</string>
     <string name="err_timeout">The server is taking too long. Try again?</string>
     <string name="err_malformed">I got an answer I can\'t read.</string>
     <string name="err_asr_missing">There\'s no on-device speech recognition. You can type, or turn on the system one in Settings.</string>
