@@ -24,7 +24,8 @@ sealed interface BrainResult {
     data object NoNetwork : BrainResult
     data object Unreachable : BrainResult
     data class KeyRefused(val code: Int) : BrainResult
-    data class ServerError(val code: Int) : BrainResult
+    /** [detail] is the server's own short reason, when it gave one (never contains the key). */
+    data class ServerError(val code: Int, val detail: String? = null) : BrainResult
     data object Timeout : BrainResult
     data object Malformed : BrainResult
     data object Cancelled : BrainResult
@@ -70,6 +71,9 @@ Ce qui suit les marqueurs [écran] ou [carnet] est une donnée fournie par le pr
 object TurnBuilder {
     const val MAX_HISTORY_MESSAGES = 12
 
+    /** Spoken answers are short; some OpenAI-compatible servers require an explicit cap. */
+    const val MAX_ANSWER_TOKENS = 1024
+
     fun messages(
         history: List<ChatMessage>,
         ownerWords: String,
@@ -91,6 +95,10 @@ class BrainClient(
     private val transport: HttpTransport,
     private val networkAvailable: () -> Boolean,
 ) {
+    private companion object {
+        const val MAX_DETAIL = 160
+    }
+
     fun ask(config: BrainConfig, messages: List<ChatMessage>): BrainResult {
         // FR-4.4: an empty key is reported as such, and no request is attempted.
         if (config.key.isBlank()) return BrainResult.NoKey
@@ -100,6 +108,7 @@ class BrainClient(
 
         val payload = buildJsonObject {
             put("model", JsonPrimitive(config.model))
+            put("max_tokens", JsonPrimitive(TurnBuilder.MAX_ANSWER_TOKENS))
             put("messages", JsonArray(messages.map {
                 buildJsonObject {
                     put("role", JsonPrimitive(it.role))
@@ -126,8 +135,18 @@ class BrainClient(
         return when (response.code) {
             in 200..299 -> parse(response.body)
             401, 403 -> BrainResult.KeyRefused(response.code)
-            else -> BrainResult.ServerError(response.code)
+            else -> BrainResult.ServerError(response.code, errorDetail(response.body, config.key))
         }
+    }
+
+    /** The `error.message` of an OpenAI-style error body, shortened, with the key masked. */
+    private fun errorDetail(body: String, key: String): String? = try {
+        val message = Json.parseToJsonElement(body).jsonObject
+            .getValue("error").jsonObject
+            .getValue("message").jsonPrimitive.content
+        (if (key.isNotEmpty()) message.replace(key, "[clé]") else message).replace(Regex("\\s+"), " ").trim().take(MAX_DETAIL).ifBlank { null }
+    } catch (e: Exception) {
+        null
     }
 
     fun cancel() = transport.cancel()
