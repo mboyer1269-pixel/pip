@@ -35,7 +35,7 @@ REA is absent, so the inspection uses the explicit fallback: **jadx** and
 | `keytool` | Present | `/usr/bin/keytool` |
 | `unzip`, `zipinfo`, `strings`, `python3` | Present | `/usr/bin/*` |
 | `aapt`, `aapt2`, `apksigner`, `adb` | Absent | `command -v` returns nothing (no Android SDK) |
-| `gitleaks` | Absent | `command -v` returns nothing |
+| `gitleaks` | Present (installed this session, Phase 3) | `gitleaks_8.21.2_linux_x64.tar.gz` from the official GitHub release, sha256 `5bc41815076e6ed6ef8fbecc9d9b75bcae31f39029ceb55da08086315316e3ba`, `version` → `8.21.2`, at `/usr/local/bin/gitleaks`; a fresh session must reinstall it |
 
 ## Other tools present that matter to this project
 

@@ -220,6 +220,26 @@ Build-time configuration names: `CODEFLYING_ENABLED`, `CODEFLYING_KEY`,
 | U10 | The "never enters a payment password" boundary | Stated in `REF:README.md:136-139`; enforcing code not located |
 | U11 | The macOS body (`desktop/`) | Out of Pip's Android scope; file names listed only |
 
+## Phase 3 — SPEC.md and closure of Phase A
+
+| # | Date (UTC) | Phase | Source | Lines / scope | Purpose |
+|---|---|---|---|---|---|
+| 18 | 2026-10-29 | 3 | this log only (findings F1–F6, UNKNOWN list) | — | write `SPEC.md`; the reference repository and the APK were **not** reopened |
+
+Owner decision recorded for the spec: the notebook never leaves the device by
+default; any excerpt sent to the brain needs the owner's explicit approval
+per turn (`SPEC.md` FR-5.4, FR-5.5).
+
+Clean-up at closure: the decoded and decompiled APK outputs
+(`scratchpad/insp/apktool-out`, `scratchpad/insp/jadx-out`, which also held
+a copy of the asset token) were deleted. The specimen APK and the reference
+clone remain outside this repository for post-closure consultations only.
+
+**Phase A is closed with the commit that adds `SPEC.md`.** From that commit
+on, implementation uses `SPEC.md` only. Phase B runs in a fresh session that
+does not receive the reference repository, the specimen APK, or any
+decompiled output.
+
 ## Post-closure consultations
 
 None.

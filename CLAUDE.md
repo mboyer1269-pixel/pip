@@ -86,6 +86,7 @@ Stop everything and report to the owner if:
 
 ## Two-hats gate (after Phase 3)
 
+- Phase A is **closed** (see `INSPECTION-LOG.md`, "Phase 3").
 - Implement **from `SPEC.md` only**.
 - No decompiled source and no file of the original is opened, consulted, or
   kept in view while writing code.
@@ -147,12 +148,10 @@ is logged locally with a timestamp.
 git status --short
 git log --oneline -10
 
-# Secrets gate — run before every commit (must print nothing)
-grep -RniE "(api[_-]?key|secret|token|password)\s*=\s*\"[^\"]+\"" --exclude-dir=.git . || true
-
-# Similarity gate — the full set of patterns (original product name,
-# publisher, wildcard bind address) is added in Phase 3 as
-# scripts/clean-room-gate.sh. Run it before every build and in Phase 7.
+# Clean-room + secrets gate — run before every commit, every build, and in
+# Phase 7 (must exit 0). Checks original product/publisher names, wildcard
+# bind address, credential assignments, APKs in the tree, and gitleaks.
+./scripts/clean-room-gate.sh
 
 # Build (Phase 7)
 ./gradlew assembleDebug
@@ -170,3 +169,5 @@ sha256sum app/build/outputs/apk/debug/*.apk
 | `SPEC.md` | Original-words specification (Phase 3) — the only input for Phase B |
 | `BRAND.md` | Pip brand charter (Phase 4) |
 | `PERMISSIONS.md` | Permission justifications (Phase 5) |
+| `scripts/clean-room-gate.sh` | Similarity and secrets gate |
+| `.gitignore` | Keeps APKs, keystores, `local.properties`, build outputs out of git |
