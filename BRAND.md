@@ -3,7 +3,8 @@
 Brand charter for Pip (Phase 4). Written from `SPEC.md` and `CLAUDE.md`
 only. Every name, phrase, color, and shape here is original to Pip.
 
-- Visual direction: **A — "La Poche"**, chosen by the owner on 2026-10-29.
+- Visual direction: **A+B — "Le pépin dans la poche"** (pocket + seed),
+  chosen by the owner on 2026-10-29.
 - Internal package: `ca.michael.pip`.
 
 ## 1. Name and slogans
@@ -226,19 +227,25 @@ Pip's own descriptions per intent (section 7.5):
 | Buttons | Envoyer cette fois · Ne pas envoyer | Send this once · Don't send |
 | After refusal | D'accord, je réponds sans. | Okay, I'll answer without it. |
 
-## 5. Visual identity — direction A "La Poche"
+## 5. Visual identity — direction A+B "Le pépin dans la poche"
 
 ### 5.1 Mark
 
 A front-facing clothing pocket: a rounded U shape, flat top edge, with a
-dashed stitch line just under the top edge. Two round eyes peek over the
-top edge — Pip sitting inside the pocket, looking out. No mouth, no arms,
-no other detail.
+dashed stitch line just under the top edge. Peeking over the top edge is
+the upper half of a small **seed** (a rounded drop shape, point up) with
+two round eyes and **one small leaf** sprouting from its tip. Pip is a
+little seed tucked warm in the owner's pocket. No mouth, no arms, no
+other detail.
 
+- Meaning: "pocket" carries the slogan in both languages; "seed" adds the
+  English double meaning of *pip* without relying on it in French.
 - Proportions: pocket width ≈ 1.1 × its height; corner radius ≈ 40 % of
-  the width at the bottom; eyes ≈ 12 % of pocket width each, spaced by
-  one eye width, their lower half hidden behind the top edge.
-- The eyes are what makes it Pip; the mark is never used without them.
+  the width at the bottom; seed width ≈ 45 % of pocket width, its lower
+  half hidden behind the top edge; eyes ≈ 22 % of seed width each, spaced
+  by one eye width; leaf ≈ 35 % of seed width, tilted about 30°.
+- Seed, eyes and leaf together are what makes it Pip; the mark is never
+  used as an empty pocket.
 
 ### 5.2 Palette
 
@@ -246,13 +253,15 @@ no other detail.
 |---|---|---|
 | `pip_indigo` | `#2F3A8F` | Primary: the pocket, headers, icon background |
 | `pip_clementine` | `#FF7A45` | Accent: Talk, Approve, the stitch line |
-| `pip_cream` | `#FFF4E8` | Light background, eyes on the icon |
-| `pip_ink` | `#1A1D33` | Text on light, dark-theme background |
-| `pip_mint` | `#3DBE8B` | Success, "connected" |
+| `pip_cream` | `#FFF4E8` | Light background, the pocket on the icon |
+| `pip_seed` | `#7A4E2D` | The seed (Pip's body) |
+| `pip_sprout` | `#2FA36B` | The leaf; success, "connected" |
+| `pip_ink` | `#1A1D33` | Text on light, eyes, dark-theme background |
 | `pip_coral_alert` | `#E5484D` | Errors, Refuse, destructive confirmations |
 
 Contrast pairs (WCAG AA target, checked in Phase 5 with a real tool):
-ink on cream, cream on indigo, ink on clementine. Clementine is never used
+ink on cream, cream on indigo, ink on clementine, ink on seed (eyes), and
+sprout on cream for success text. Clementine is never used
 for body text on cream. Each value marked here is a design choice, not a
 measured result: contrast ratios are **UNKNOWN** until Phase 5 checks them.
 
@@ -260,12 +269,14 @@ measured result: contrast ratios are **UNKNOWN** until Phase 5 checks them.
 
 - Background layer: flat `pip_indigo`.
 - Foreground layer: the pocket in `pip_cream`, stitch line in
-  `pip_clementine`, eyes in `pip_ink` with a small cream highlight dot.
+  `pip_clementine`, the seed in `pip_seed`, eyes in `pip_ink` with a
+  small cream highlight dot, leaf in `pip_sprout`.
 - The whole mark stays inside the central safe zone of the 108 dp
   foreground (Android's adaptive-icon guidance; exact safe-zone size to be
   confirmed against
   <https://developer.android.com/develop/ui/views/launch/icon_design_adaptive>).
-- Monochrome layer (themed icons): pocket outline + two eye dots.
+- Monochrome layer (themed icons): pocket outline, seed outline, leaf,
+  two eye dots.
 - Debug build: same icon with a small clementine "D" badge at bottom-right,
   so it is never confused with a future release build.
 - All icons are drawn as original vector drawables in Phase 5. No external
@@ -273,24 +284,27 @@ measured result: contrast ratios are **UNKNOWN** until Phase 5 checks them.
 
 ### 5.4 Notification small icon
 
-Single-color silhouette: the filled pocket with two eye cut-outs, no
-stitch. Must read at 24 dp. The state is carried by the notification text
-(S1), not by the icon.
+Single-color silhouette: the filled pocket with the leaf rising above its
+top edge; no seed, eyes, or stitch at this size. Must read at 24 dp — a
+risk to check on a device in Phase 5 (fallback: drop the leaf, keep the
+pocket). The state is carried by the notification text (S1), not by the
+icon.
 
 ### 5.5 Pip's face on Home (S2)
 
-The two eyes are the only animated part.
+The eyes, the leaf, and the seed's height in the pocket are the only
+animated parts.
 
-| State | Eyes |
+| State | Animation |
 |---|---|
-| Ready | Open, slow blink every few seconds |
-| Listening | Pupils slightly larger |
-| Thinking | Looking up, small side-to-side drift |
-| Speaking | Gentle bounce of the pocket |
-| Waiting for approval | Looking at the approval button |
-| Success | One wink |
-| Error | Eyes half-closed, no animation |
-| Stopping | Eyes sink below the pocket edge |
+| Ready | Eyes open, slow blink every few seconds |
+| Listening | Pupils slightly larger, seed rises a little |
+| Thinking | Eyes look up, leaf sways gently |
+| Speaking | Gentle bounce of the seed |
+| Waiting for approval | Eyes look at the approval button |
+| Success | One wink, leaf perks up |
+| Error | Eyes half-closed, leaf droops, no motion |
+| Stopping | Seed slides down into the pocket |
 
 Animations respect the system "remove animations" setting.
 
