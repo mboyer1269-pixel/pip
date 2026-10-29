@@ -46,12 +46,11 @@ Apache 2.0), copied unmodified after review: `android-permissions-security`,
 Details and rationale in `.claude/skills/README.md`. They load in any session
 started on this repository.
 
-The full **Android Skills plugin** (`android-skills@android-skills`, version
-1.0.19, all 36 skills) is also enabled at project scope in
-`.claude/settings.json` (marketplace `android/skills` on GitHub). Proof:
-`claude plugin list` shows it `enabled`, scope `project`. Unlike the vendored
-five, the plugin is **not pinned**: a marketplace refresh pulls the latest
-upstream commit, so review upstream changes before relying on a new version.
+The full Android Skills plugin (36 skills) was enabled briefly, then removed
+at the owner's request (2026-10-29): no v1 feature needs the other 31 skills,
+the Compose ones could pull Phase B out of scope, and an unpinned plugin
+updates its instructions without review. Re-add individual skills one by one
+when a v2 feature needs them.
 
 ## Other tools present that matter to this project
 
