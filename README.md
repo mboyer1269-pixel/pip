@@ -1,10 +1,119 @@
-# Pip
+<p align="center">
+  <img src="docs/brand/pip-hero.svg" alt="Pip — un petit pépin aux yeux ronds sort d'une poche crème. « Petit agent, grande poche » · Small agent, big pocket" width="100%">
+</p>
 
-« Petit agent, grande poche » — "Small agent, big pocket".
+<p align="center">
+  <img alt="Android 12+" src="https://img.shields.io/badge/Android-12%2B-2F3A8F?style=for-the-badge">
+  <img alt="Kotlin" src="https://img.shields.io/badge/Kotlin-2.0-FF7A45?style=for-the-badge">
+  <img alt="Clean-room" src="https://img.shields.io/badge/code-100%25%20original-2FA36B?style=for-the-badge">
+  <img alt="Build perso" src="https://img.shields.io/badge/build-perso%20debug-7A4E2D?style=for-the-badge">
+</p>
 
-Pip is a personal, resident Android companion for its owner's own devices.
-It is built from `SPEC.md` (function and security) and `BRAND.md` (voice and
-look) only. Personal debug builds; no distribution, no release signing.
+<h3 align="center">Allô, moi c'est Pip. Je loge dans ta poche — on y va quand tu veux.</h3>
+<p align="center"><em>Hi, I'm Pip. I live in your pocket — ready when you are.</em></p>
+
+---
+
+## 🌱 Pip en 30 secondes
+
+Pip est un petit compagnon Android qui vit sur **ton** téléphone. Tu lui
+parles, il te répond à voix haute. Il regarde ton écran **quand tu le lui
+demandes**, garde un carnet chiffré qui ne quitte jamais l'appareil, et peut
+recevoir des tâches de ton propre orchestrateur — chacune attend ton oui.
+
+Le nom joue sur deux tableaux : en anglais, *pip* veut dire **pépin**. Pip,
+c'est donc un pépin rangé bien au chaud dans ta poche. Et quand quelque chose
+cloche ? Il te le dit franchement : c'est juste un *petit pépin*.
+
+> *Pip is a small Android companion living on your own phone. It talks, it
+> listens, it looks at your screen only when asked, keeps an encrypted
+> notebook that never leaves the device, and runs tasks from your own
+> orchestrator — each one waits for your yes.*
+
+## 🤝 Les quatre promesses de Pip
+
+| | Promesse | Ce que ça veut dire, concrètement |
+|---|---|---|
+| 🔔 | **Toujours affiché** | Si Pip tourne, sa notification est là, avec **Arrêter** à portée de pouce. Plus de notification = Pip arrêté. |
+| ✋ | **Demandé, pas deviné** | Lire l'écran, envoyer un bout du carnet, exécuter une tâche : un geste de ta part, chaque fois. Jamais de « toujours autoriser ». |
+| 📍 | **Local d'abord** | Rien ne quitte le téléphone sans une destination nommée et une raison. Le carnet, lui, ne sort jamais. |
+| 💬 | **Honnête** | Pas de clé ? Pip le dit. Pas de réseau ? Il le dit aussi. Il ne déguise jamais un réglage manquant en panne. |
+
+## 🎒 Ce qu'il y a dans la poche (v1)
+
+| | Fonction | Comment |
+|---|---|---|
+| 🔔 | Présence | Service au premier plan, notification permanente, **Arrêter** toujours présent |
+| 🎙️ | Voix | Reconnaissance **sur l'appareil** d'abord ; celle du système seulement si tu l'acceptes une fois. Réponses lues par la synthèse d'Android |
+| 👀 | Regard sur l'écran | Service d'accessibilité **en lecture seule**, déclenché par toi, mots de passe exclus |
+| 🧠 | Cerveau au choix | N'importe quel point d'accès compatible OpenAI, en `https://`, avec **ta** clé — scellée par le Keystore |
+| 📓 | Carnet | Notes, promesses, rappels — chiffré AES-GCM, consultable et effaçable par toi |
+| 📡 | Tâches à distance (ACP) | Connexion **sortante** `wss://` vers ton orchestrateur, enveloppes signées, quatre intentions seulement |
+| 🛡️ | Permissions | Six demandées, plus la protection du service d'accessibilité — pas une de plus, chacune justifiée dans [`PERMISSIONS.md`](PERMISSIONS.md) |
+
+## 🚫 Ce que Pip ne fera jamais
+
+- Ouvrir un port pour écouter le réseau.
+- Toucher, taper ou glisser dans une autre application (v1 : lecture seule).
+- Envoyer un SMS, passer un appel, lire tes contacts ou ta position.
+- Exécuter une commande, ouvrir une URL ou un `Intent` libres venus de l'extérieur.
+- Tourner sans que sa notification soit affichée.
+- Te demander un « oui pour toujours ».
+
+## 🎭 Les humeurs de Pip
+
+<p align="center">
+  <img src="docs/brand/pip-moods.svg" alt="Les sept humeurs de Pip : Pip est là, Je t'écoute, Je réfléchis, Ton oui ?, C'est rangé, Petit pépin, Je me range" width="100%">
+</p>
+
+Seuls les yeux, la feuille et la hauteur du pépin bougent — et tout s'arrête si
+tu as coupé les animations dans Android.
+
+## ✅ Une tâche, un oui
+
+<p align="center">
+  <img src="docs/brand/pip-one-yes.svg" alt="Une tâche signée arrive de ton orchestrateur et attend ton oui sur le téléphone : oui, elle s'exécute une fois ; non, rien ne bouge ; après 5 minutes, elle expire" width="100%">
+</p>
+
+Une tâche, une décision. Pas d'approbation en lot, pas de « toujours ». Les
+messages trop vieux (plus de 120 s), mal signés ou adressés à quelqu'un d'autre
+que `pip` sont rejetés sans rien exécuter — et notés au journal.
+
+## 🎨 Couleurs
+
+<p align="center">
+  <img src="docs/brand/pip-palette.svg" alt="Palette de Pip : indigo, clémentine, crème, pépin, pousse, encre, corail" width="100%">
+</p>
+
+Charte complète, voix et textes de chaque écran : [`BRAND.md`](BRAND.md).
+
+## 🗺️ Où on en est
+
+| Phase | Quoi | État |
+|---|---|---|
+| 0–3 | Licence, inspection, `SPEC.md` — reconstruction clean-room | ✅ fermée |
+| 4 | Marque : `BRAND.md` | ✅ |
+| 5–6 | Code v1, doctrine ACP, durcissement | ✅ livré, à valider sur l'appareil |
+| 7 | Build CI, vérification finale, installation | 🔄 en cours |
+
+Question ouverte : **Q-1**, le domaine de l'orchestrateur. D'ici là, l'ACP
+reste débranché, par conception.
+
+## 📜 Origine du code
+
+Pip est une **reconstruction clean-room** : le comportement d'une application
+existante a été observé, décrit dans une spécification originale
+([`SPEC.md`](SPEC.md)), puis Pip a été écrit à partir de cette spécification
+seulement, dans une session séparée. Aucun code, texte, image ni nom n'a été
+repris. La traçabilité est dans [`INSPECTION-LOG.md`](INSPECTION-LOG.md).
+
+---
+
+# 🛠️ Sous le capot
+
+*Under the hood — for developers.* Pip is built from `SPEC.md` (function and
+security) and `BRAND.md` (voice and look) only. Personal debug builds; no
+distribution, no release signing.
 
 ## Build
 

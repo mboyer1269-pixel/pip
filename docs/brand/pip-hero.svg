@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" width="1200" height="420" role="img" aria-labelledby="t d">
+  <title id="t">Pip</title>
+  <desc id="d">A small seed with two eyes and a leaf peeks out of a cream pocket on an indigo background. Pip — Petit agent, grande poche. Small agent, big pocket.</desc>
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFF4E8" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="#FFF4E8" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#36429E"/>
+      <stop offset="100%" stop-color="#262F78"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Card and pocket seam -->
+  <rect x="0" y="0" width="1200" height="420" rx="36" fill="url(#bg)"/>
+  <rect x="18" y="18" width="1164" height="384" rx="24" fill="none" stroke="#FF7A45" stroke-width="3" stroke-dasharray="14 10" stroke-linecap="round" opacity="0.9"/>
+
+  <!-- Tiny drifting seeds in the background -->
+  <g fill="#FFF4E8" opacity="0.18">
+    <circle cx="420" cy="70" r="3"><animate attributeName="cy" values="70;62;70" dur="6s" repeatCount="indefinite"/></circle>
+    <circle cx="1110" cy="96" r="4"><animate attributeName="cy" values="96;86;96" dur="7s" repeatCount="indefinite"/></circle>
+    <circle cx="1060" cy="340" r="2.5"><animate attributeName="cy" values="340;332;340" dur="5s" repeatCount="indefinite"/></circle>
+    <circle cx="90" cy="330" r="3"><animate attributeName="cy" values="330;322;330" dur="6.5s" repeatCount="indefinite"/></circle>
+    <circle cx="360" cy="360" r="2"/>
+    <circle cx="800" cy="48" r="2.5"/>
+  </g>
+
+  <!-- Glow behind the mark -->
+  <circle cx="230" cy="210" r="170" fill="url(#glow)"/>
+
+  <!-- The mark: same geometry as the adaptive icon foreground (108 x 108 grid) -->
+  <g transform="translate(3,-23) scale(4.2)">
+    <!-- Seed group bobs gently -->
+    <g>
+      <animateTransform attributeName="transform" type="translate" values="0 0;0 -1.4;0 0" dur="3.2s" repeatCount="indefinite"/>
+      <path fill="#7A4E2D" d="M54,34 L61.69,50.39 A8.5,8.5 0 1 1 46.31,50.39 Z"/>
+      <path fill="#2FA36B" d="M54,34 Q53.5,27 60,25.5 Q61,32 54,34 Z">
+        <animateTransform attributeName="transform" type="rotate" values="0 54 34;-10 54 34;0 54 34;7 54 34;0 54 34" dur="4.6s" repeatCount="indefinite"/>
+      </path>
+      <ellipse cx="50.2" cy="48.5" rx="1.9" ry="1.9" fill="#1A1D33">
+        <animate attributeName="ry" values="1.9;1.9;0.2;1.9;1.9" keyTimes="0;0.9;0.94;0.98;1" dur="4.2s" repeatCount="indefinite"/>
+      </ellipse>
+      <ellipse cx="57.8" cy="48.5" rx="1.9" ry="1.9" fill="#1A1D33">
+        <animate attributeName="ry" values="1.9;1.9;0.2;1.9;1.9" keyTimes="0;0.9;0.94;0.98;1" dur="4.2s" repeatCount="indefinite"/>
+      </ellipse>
+      <g fill="#FFF4E8">
+        <animate attributeName="opacity" values="1;1;0;1;1" keyTimes="0;0.9;0.94;0.98;1" dur="4.2s" repeatCount="indefinite"/>
+        <circle cx="50.9" cy="47.8" r="0.6"/>
+        <circle cx="58.5" cy="47.8" r="0.6"/>
+      </g>
+    </g>
+    <!-- Pocket shadow, pocket, stitch -->
+    <path fill="#1A1D33" opacity="0.28" d="M36,53.5 L74,53.5 L74,71.5 A16,16 0 0 1 58,87.5 L52,87.5 A16,16 0 0 1 36,71.5 Z"/>
+    <path fill="#FFF4E8" d="M35,52 L73,52 L73,70 A16,16 0 0 1 57,86 L51,86 A16,16 0 0 1 35,70 Z"/>
+    <path fill="#FF7A45" d="M39,55.5h2v1h-2z M43,55.5h2v1h-2z M47,55.5h2v1h-2z M51,55.5h2v1h-2z M55,55.5h2v1h-2z M59,55.5h2v1h-2z M63,55.5h2v1h-2z M67,55.5h2v1h-2z"/>
+  </g>
+
+  <!-- Wordmark and slogans -->
+  <g font-family="'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">
+    <text x="452" y="196" font-size="150" font-weight="800" fill="#FFF4E8" letter-spacing="-4">Pip</text>
+    <circle cx="704" cy="188" r="12" fill="#FF7A45"/>
+    <text x="456" y="258" font-size="40" font-weight="700" fill="#FF7A45">« Petit agent, grande poche »</text>
+    <text x="458" y="300" font-size="27" font-weight="500" fill="#FFF4E8" opacity="0.78">Small agent, big pocket</text>
+
+    <g font-size="17" font-weight="600" fill="#FFF4E8" text-anchor="middle">
+      <rect x="456" y="330" width="176" height="38" rx="19" fill="#FFF4E8" fill-opacity="0.1" stroke="#FFF4E8" stroke-opacity="0.35"/>
+      <text x="544" y="355">Toujours affiché</text>
+      <rect x="644" y="330" width="190" height="38" rx="19" fill="#FFF4E8" fill-opacity="0.1" stroke="#FFF4E8" stroke-opacity="0.35"/>
+      <text x="739" y="355">Rien sans ton oui</text>
+      <rect x="846" y="330" width="164" height="38" rx="19" fill="#FFF4E8" fill-opacity="0.1" stroke="#FFF4E8" stroke-opacity="0.35"/>
+      <text x="928" y="355">Carnet chiffré</text>
+      <rect x="1022" y="330" width="146" height="38" rx="19" fill="#2FA36B" fill-opacity="0.25" stroke="#2FA36B"/>
+      <text x="1095" y="355">Local d'abord</text>
+    </g>
+  </g>
+</svg>
