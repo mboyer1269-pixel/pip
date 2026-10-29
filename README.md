@@ -91,7 +91,7 @@ Charte complète, voix et textes de chaque écran : [`BRAND.md`](BRAND.md).
 
 | Phase | Quoi | État |
 |---|---|---|
-| 0–3 | Licence, inspection, `SPEC.md` — reconstruction clean-room | ✅ fermée |
+| 0–3 | Fondations : licence, analyse, `SPEC.md` | ✅ |
 | 4 | Marque : `BRAND.md` | ✅ |
 | 5–6 | Code v1, doctrine ACP, durcissement | ✅ livré, à valider sur l'appareil |
 | 7 | Build CI, vérification finale, installation | 🔄 en cours |
@@ -99,13 +99,26 @@ Charte complète, voix et textes de chaque écran : [`BRAND.md`](BRAND.md).
 Question ouverte : **Q-1**, le domaine de l'orchestrateur. D'ici là, l'ACP
 reste débranché, par conception.
 
-## 📜 Origine du code
+## 🌳 Un pépin, ça pousse
 
-Pip est une **reconstruction clean-room** : le comportement d'une application
-existante a été observé, décrit dans une spécification originale
-([`SPEC.md`](SPEC.md)), puis Pip a été écrit à partir de cette spécification
-seulement, dans une session séparée. Aucun code, texte, image ni nom n'a été
-repris. La traçabilité est dans [`INSPECTION-LOG.md`](INSPECTION-LOG.md).
+Pip commence petit, exprès. Un pépin, c'est une promesse : tout ce qu'il faut
+pour devenir grand est déjà dedans. La v1 pose les racines — la confiance, la
+voix, le carnet, le oui. La suite pousse sur ces racines-là, sans jamais les
+arracher.
+
+| Saison | Ce qui pourrait sortir de la poche |
+|---|---|
+| 🌱 **Maintenant** | Parler, écouter, regarder quand tu demandes, retenir, attendre ton oui |
+| 🌿 **Bientôt** | Pip sur tes autres appareils, qui se reconnaissent entre eux |
+| 🍃 **Plus tard** | Des yeux (la caméra), des mains (agir dans tes apps), toujours sur ton oui |
+| 🌳 **Un jour** | Un Pip qui t'accompagne partout où tu as une poche |
+
+Chaque nouvelle branche passera par la même règle que le tronc : visible,
+demandée, locale d'abord, honnête. Grande poche, oui — mais jamais un fourre-tout.
+
+> *A pip is a promise: everything it needs to grow is already inside. v1 grows
+> the roots — trust, voice, notebook, the yes. Every new branch follows the
+> same rule as the trunk.*
 
 ---
 
