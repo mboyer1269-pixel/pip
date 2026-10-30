@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.provider.Settings
 import android.widget.LinearLayout
 import ca.michael.pip.R
+import ca.michael.pip.notify.PipNotificationListener
 import ca.michael.pip.screen.PipAccessibilityService
 import ca.michael.pip.service.PipNotifications
 
@@ -54,6 +55,11 @@ class SetupActivity : Activity() {
             startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
         }
 
+        row(R.string.cap_notif_access, R.string.cap_notif_access_gives, R.string.cap_notif_access_lost,
+            PipNotificationListener.granted(this)) {
+            startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+        }
+
         // INTERNET is granted at install; shown so the owner knows what it is for.
         row(R.string.cap_network, R.string.cap_network_gives, R.string.cap_network_lost, true, null)
 
@@ -67,7 +73,7 @@ class SetupActivity : Activity() {
         column.addView(Ui.text(this, getString(gives), 15f))
         column.addView(Ui.text(this, getString(R.string.if_refused, getString(lost)), 14f))
         if (!ok && action != null) {
-            val label = if (title == R.string.cap_a11y) R.string.open_settings else R.string.allow
+            val label = if (title == R.string.cap_a11y || title == R.string.cap_notif_access) R.string.open_settings else R.string.allow
             column.addView(Ui.button(this, getString(label)) { action() })
         }
     }

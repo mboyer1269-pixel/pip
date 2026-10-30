@@ -82,6 +82,18 @@
                 android:value="Personal assistant the owner turns on; visible notification with Stop; keeps the owner-approved task channel and reminders running." />
         </service>
 
+        <!-- Block C (SPEC 14): reads shown notifications only for an approved action.
+             Exported for the system to bind it; only the system holds the permission. -->
+        <service
+            android:name=".notify.PipNotificationListener"
+            android:exported="true"
+            android:label="@string/notif_listener_label"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+
         <!-- Read-only screen context (V1-3). Exported for the system to bind it;
              only holders of BIND_ACCESSIBILITY_SERVICE (the system) can. -->
         <service

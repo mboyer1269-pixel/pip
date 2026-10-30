@@ -55,6 +55,10 @@ sealed interface DeviceAction {
     data object GetSteps : DeviceAction {
         override val name = "get_steps"; override val sendsDataToBrain = true
     }
+    /** Block C (SPEC 14): notifications currently shown, read only on approval. */
+    data class ReadNotifications(val app: String?, val limit: Int) : DeviceAction {
+        override val name = "read_notifications"; override val sendsDataToBrain = true
+    }
 }
 
 sealed interface ActionParse {
@@ -70,6 +74,7 @@ object ActionCatalog {
     val NAMES = listOf(
         "open_app", "call", "send_sms", "find_contact", "read_sms",
         "read_call_log", "read_calendar", "add_calendar_event", "get_location", "get_steps",
+        "read_notifications",
     )
 
     private val NUMBER = Regex("^\\+?[0-9 ().\\-]{3,24}$")
@@ -148,6 +153,10 @@ object ActionCatalog {
             }
             "get_location" -> { only(); DeviceAction.GetLocation }
             "get_steps" -> { only(); DeviceAction.GetSteps }
+            "read_notifications" -> {
+                only("app", "limit")
+                DeviceAction.ReadNotifications(str("app", 100, required = false), int("limit", 1, 20, 10))
+            }
             else -> throw Invalid("unknown action")
         }
     }
@@ -173,6 +182,8 @@ object ActionCatalog {
                 "duration_minutes" to i("Duration, 5 to 1440 (default 60)"), "location" to s("Optional place")), "title", "start"))
         add(tool("get_location", "Get the phone's current position. The owner approves sending it.", props()))
         add(tool("get_steps", "Get the step counter (steps since the phone last restarted). The owner approves sending it.", props()))
+        add(tool("read_notifications", "Read the notifications currently shown on the phone. The owner approves sending them.",
+            props("app" to s("Optional: only this app, by its visible name"), "limit" to i("How many, 1 to 20 (default 10)"))))
     }
 
     private fun s(d: String) = buildJsonObject { put("type", JsonPrimitive("string")); put("description", JsonPrimitive(d)) }

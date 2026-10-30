@@ -49,6 +49,7 @@ cloche ? Il te le dit franchement : c'est juste un *petit pépin*.
 | 🧠 | Cerveau au choix | N'importe quel point d'accès compatible OpenAI, en `https://`, avec **ta** clé — scellée par le Keystore |
 | 📓 | Carnet | Notes, promesses, rappels — chiffré AES-GCM, consultable et effaçable par toi |
 | 📡 | Tâches à distance (ACP) | Connexion **sortante** `wss://` vers ton orchestrateur, enveloppes signées, quatre intentions seulement |
+| 🔔 | **Notifications** (bloc C) | Pip lit et résume les notifications affichées, **seulement quand tu le demandes** et après ton oui — rien n'est lu à l'arrivée |
 | 📱 | **Actions sur le téléphone** (bloc A) | Appeler, texter, lire tes textos, appels, contacts, calendrier, position, pas ; ouvrir une app ; ajouter un événement — le cerveau propose, **tu approuves chaque action** |
 | 🛡️ | Permissions | Chacune demandée au moment où une action approuvée en a besoin, et justifiée dans [`PERMISSIONS.md`](PERMISSIONS.md) |
 
@@ -182,6 +183,7 @@ distribution, no release signing.
 | `app/.../screen/PipAccessibilityService.kt` | Read-only screen capture on request (V1-3) |
 | `app/.../acp/AcpConnection.kt` | Outbound WebSocket, verify-then-broker (V1-6) |
 | `app/.../actions/DeviceActionRunner.kt` | Block A: prepares each S10 card (local contact lookup) and runs approved actions |
+| `app/.../notify/PipNotificationListener.kt` | Block C: reads shown notifications only for an approved action |
 | `app/.../acp/DeviceTaskExecutor.kt` | Runs the four approved intents |
 | `app/.../ui/MainActivity.kt` | S2 Home and S9 excerpt approval |
 | `app/.../ui/SetupActivity.kt` | S3 Setup & permissions |
