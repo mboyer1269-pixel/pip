@@ -137,7 +137,14 @@ the reference, but CI should catch crashes first.
   - the crash buffer stays empty.
 - [x] Gates rerun on the merged `bb9e499`: clean-room exit 0, permissions
   exit 0, `:core:test` 48/48.
-- [ ] CI `smoke` job green on the PR head, then merge.
+- [x] CI `smoke` job green on the PR head (run 40995340777, `cab472b`).
+  - The first run failed on the test script, not on Pip: the short
+    `dumpsys` output has no `isForeground` field, and the check ran before
+    `startForeground`. Fixed in `cab472b`.
+  - Log on the emulator (API 34): `ok installed`, `ok launched`,
+    `ok ASSIST turned Pip on (foreground service running)`,
+    `ok S1 notification posted`, `ok no crash`, `SMOKE PASS`.
+  - Merge after CI is green on this commit.
 
 ## Out of scope (stated, not built)
 
