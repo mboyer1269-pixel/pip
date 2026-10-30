@@ -368,6 +368,13 @@ the source manifest → `:core:test` → `assembleDebug` →
 `sha256sum` → artifact `pip-debug-apk` (APK + `apk-sha256.txt`, kept 7 days).
 The APK is never committed (`.gitignore`, gate check "apk in tree").
 
+A second job, `smoke`, installs that APK on an Android 14 emulator and runs
+`scripts/smoke-test.sh`, which checks three things on a real system:
+- the app launches;
+- the push-to-talk `ASSIST` gesture turns Pip on (foreground service running,
+  S1 posted);
+- the crash buffer stays empty.
+
 ## Install on the owner's phone (debug build)
 
 1. On GitHub: **Actions → android → the latest green run → Artifacts →
