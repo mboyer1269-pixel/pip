@@ -164,7 +164,15 @@ the reference, but CI should catch crashes first.
 - [x] CI green on `22434d2` (runs 40999283018 / 40999278378): build, then
   smoke `ok Stop on S1 stopped Pip`, `ok home shows « Allumer Pip » (FR)`,
   `ok home shows "Turn Pip on" (EN)`, `SMOKE PASS`.
-- [ ] Merge PR #8 after CI is green on its head.
+- [x] Stop tap made robust in `71c3b9e`: on `8035f4e` the push run passed
+  but the pull_request run failed. The tap position had been read while the
+  shade was still settling. The script now taps only after two identical
+  reads and retries up to 3 times.
+  - Runs 41000243820 / 41000238706, both green.
+  - The home screen shows French end to end (« Il est tard… Pip chuchote :
+    je suis là. », « Allumer Pip »).
+  - Stop worked on attempt 1; `SMOKE PASS`.
+- [x] Merge PR #8 after CI is green on its head.
 
 Still owner-only, on the phone: bubble gestures over another app, the
 assistant gesture on the owner's phone model, the S10 approval card with a
