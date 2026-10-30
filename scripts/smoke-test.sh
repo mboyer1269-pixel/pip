@@ -5,8 +5,10 @@
 #   2. the push-to-talk gesture (ASSIST intent, SPEC 16) turns Pip on:
 #      PipService runs in the foreground and S1 is posted (V1-1, FR-P.3);
 #   3. the Stop action on S1 stops Pip (FR UI), and the home screen says so;
-#   4. the bubble (SPEC 15) shows over another app once enabled, and a tap
-#      on it brings Pip to the front;
+#   4. the bubble (SPEC 15) shows over another app once enabled; a tap brings
+#      Pip to the front, a drag only moves it, a long press reads the app
+#      underneath (FR-B.6); with Pip as the assistant, the ASSIST key turns
+#      Pip on (SPEC 16);
 #   5. the English strings load when the app locale is English;
 #   6. the crash buffer stays empty for the app.
 # Usage: scripts/smoke-test.sh path/to/app-debug.apk
@@ -51,6 +53,24 @@ scroll_to_text() {
     sleep 1
   done
   return 1
+}
+# bubble_pos prints the centre "x y" of Pip's overlay window, or nothing.
+bubble_pos() {
+  adb shell dumpsys window windows | python3 -c '
+import re, sys
+pkg = sys.argv[1]
+for block in sys.stdin.read().split("Window #")[1:]:
+    if "APPLICATION_OVERLAY" in block and pkg in block:
+        m = re.search(r"(?:mFrame|\bframe)=\[(-?\d+),(-?\d+)\]\[(-?\d+),(-?\d+)\]", block)
+        if m:
+            x1, y1, x2, y2 = map(int, m.groups())
+            print((x1 + x2) // 2, (y1 + y2) // 2); break
+' "$pkg"
+}
+# resumed prints the resumed activity line.
+resumed() {
+  acts="$(adb shell dumpsys activity activities)"
+  grep -E "topResumedActivity|mResumedActivity" <<<"$acts" | head -n 1 | tr -d "\r" || true
 }
 wait_text() { for i in $(seq 1 15); do xy="$(find_text "$1")"; [ -n "$xy" ] && return 0; sleep 1; done; return 1; }
 
@@ -146,16 +166,7 @@ sleep 2
 adb shell input keyevent KEYCODE_HOME
 bubble_xy=""
 for i in $(seq 1 15); do
-  bubble_xy="$(adb shell dumpsys window windows | python3 -c '
-import re, sys
-pkg = sys.argv[1]
-for block in sys.stdin.read().split("Window #")[1:]:
-    if "APPLICATION_OVERLAY" in block and pkg in block:
-        m = re.search(r"(?:mFrame|\bframe)=\[(-?\d+),(-?\d+)\]\[(-?\d+),(-?\d+)\]", block)
-        if m:
-            x1, y1, x2, y2 = map(int, m.groups())
-            print((x1 + x2) // 2, (y1 + y2) // 2); break
-' "$pkg")"
+  bubble_xy="$(bubble_pos)"
   [ -n "$bubble_xy" ] && break
   sleep 1
 done
@@ -174,6 +185,47 @@ for i in $(seq 1 10); do
 done
 grep -q "$pkg/ca.michael.pip.ui.MainActivity" <<<"$top" || fail "tap on the bubble did not bring Pip to the front ($top)"
 echo "ok   tap on the bubble opened Pip"
+
+# Drag (FR-B.3): the bubble moves and Pip does not open.
+adb shell input keyevent KEYCODE_HOME
+sleep 2
+bubble_xy="$(bubble_pos)"; [ -n "$bubble_xy" ] || fail "bubble gone after going home"
+set -- $bubble_xy
+adb shell input swipe "$1" "$2" "$1" "$(( $2 + 250 ))" 300
+sleep 2
+moved="$(bubble_pos)"
+[ -n "$moved" ] && [ "$moved" != "$bubble_xy" ] || fail "drag did not move the bubble ($bubble_xy -> $moved)"
+grep -q "$pkg/ca.michael.pip.ui.MainActivity" <<<"$(resumed)" && fail "drag opened Pip (a drag must only move the bubble)"
+echo "ok   drag moved the bubble ($bubble_xy -> $moved) without opening Pip"
+
+# Long press (FR-B.6): with accessibility on, Pip reads the app underneath and opens.
+adb shell settings put secure enabled_accessibility_services "$pkg/ca.michael.pip.screen.PipAccessibilityService"
+adb shell settings put secure accessibility_enabled 1
+sleep 3
+set -- $moved
+adb shell input swipe "$1" "$2" "$1" "$2" 1500
+# Proof of the capture: « Voir ce que j'ai lu » only shows when this turn holds a
+# snapshot (the « J'ai lu l'écran… » line is soon replaced by the voice outcome).
+wait_text "Voir ce que j'ai lu" \
+  || { ui_labels; fail "long press on the bubble did not read the screen"; }
+echo "ok   long press read the app underneath and opened Pip"
+
+# Assistant gesture (SPEC 16): Pip as the assistant role holder, Pip off, then
+# the system ASSIST key must turn Pip on (foreground service).
+adb shell cmd role add-role-holder --user 0 android.app.role.ASSISTANT "$pkg" || true
+echo "info assistant role: $(adb shell cmd role get-role-holders --user 0 android.app.role.ASSISTANT | tr -d "\r")"
+adb shell am force-stop "$pkg"
+adb shell input keyevent KEYCODE_HOME
+sleep 2
+adb shell input keyevent KEYCODE_ASSIST
+dump=""
+for i in $(seq 1 20); do
+  dump="$(adb shell dumpsys activity -a services "$pkg")"
+  grep -q "isForeground=true" <<<"$dump" && break
+  sleep 1
+done
+grep -q "isForeground=true" <<<"$dump" || fail "ASSIST key with Pip as assistant did not turn Pip on ($(resumed))"
+echo "ok   assistant key (Pip as assistant) turned Pip on"
 
 # English strings (values/) load when the app locale is English.
 adb shell cmd locale set-app-locales "$pkg" --locales en >/dev/null

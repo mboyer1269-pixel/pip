@@ -174,9 +174,9 @@ the reference, but CI should catch crashes first.
   - Stop worked on attempt 1; `SMOKE PASS`.
 - [x] Merge PR #8 after CI is green on its head.
 
-Still owner-only, on the phone: drag and long press on the bubble, the
-assistant gesture on the owner's phone model, the S10 approval card with a
-live brain (approve / refuse / 1 s arming).
+Still owner-only, on the phone: the S10 approval card with a live brain
+(approve / refuse / 1 s arming), and the assistant button of the owner's
+own phone model. Task 10 moved the rest to the emulator.
 
 ## Task 9 — Bubble on the emulator (after the goal check)
 
@@ -192,6 +192,24 @@ live brain (approve / refuse / 1 s arming).
   `ok bubble shown over another app (at 28 292)`,
   `ok tap on the bubble opened Pip`, `SMOKE PASS`.
 - [ ] Merge PR #9 after CI is green on its head.
+
+## Task 10 — Bubble drag, long press and the assistant key on the emulator
+
+- [x] Drag: the overlay window moves and Pip does not open (FR-B.3).
+- [x] Long press, with Pip's accessibility on: Pip reads the app underneath
+  (FR-B.6). The proof is « Voir ce que j'ai lu », shown only when the turn
+  holds a snapshot.
+  - The first check waited for the « J'ai lu l'écran… » line. That line is
+    soon replaced by the voice outcome, since the emulator has no
+    microphone.
+- [x] Pip is set as the assistant role holder and force-stopped. Then the
+  system `KEYCODE_ASSIST` turns Pip on, with its foreground service running
+  (SPEC 16).
+- [x] CI green on `e739907` (runs 41014178825 / 41014173006):
+  - `ok drag moved the bubble (28 292 -> 28 539) without opening Pip`
+  - `ok long press read the app underneath and opened Pip`
+  - `ok assistant key (Pip as assistant) turned Pip on`
+  - `SMOKE PASS`
 
 ## Out of scope (stated, not built)
 
