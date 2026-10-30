@@ -65,12 +65,15 @@ class PipService : Service() {
                 return START_NOT_STICKY
             }
         }
+        // startForeground comes first: a service started with startForegroundService must call it,
+        // even when it then stops at once.
+        startForeground(PipNotifications.ID_STATUS, notifications.status(), ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
         // FR-1.4: no notification, no background Pip.
         if (!notifications.enabled()) {
+            stopForeground(STOP_FOREGROUND_REMOVE)
             stopSelf()
             return START_NOT_STICKY
         }
-        startForeground(PipNotifications.ID_STATUS, notifications.status(), ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE)
         if (!pip.state.running) {
             pip.state.update { running = true; errorReason = null }
             pip.state.addListener(onStateChange)

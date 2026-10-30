@@ -237,4 +237,28 @@
     <string name="bubble_toggle">Show Pip\'s bubble over other apps</string>
     <string name="bubble_note">Tap the bubble to talk to me, drag it to move it. It\'s only there while I\'m on.</string>
     <string name="bubble_desc">Pip — tap to talk to me</string>
+
+    <string name="action_talk">Talk</string>
+    <string name="assistant_section">Push to talk</string>
+    <string name="assistant_button">Make Pip the assistant</string>
+    <string name="assistant_note">Pick Pip as your digital assistant: a long press on your button (home or power, depending on your phone) opens me listening.</string>
+    <string name="looked_ready">I read the screen you showed me. Tell me what you want to know.</string>
+    <string name="face_desc">Pip — tap me</string>
+    <string name="greet_morning">Good morning! Pip is awake, ready when you are.</string>
+    <string name="greet_afternoon">Hi! Pip is in your pocket, ready when you are.</string>
+    <string name="greet_evening">Good evening! Pip is still here if you need me.</string>
+    <string name="greet_night">It\'s late… Pip whispers: I\'m here.</string>
+    <string name="chip_tomorrow">What do I have tomorrow?</string>
+    <string name="chip_notifications">Sum up my notifications</string>
+    <string name="chip_calls">Who called me?</string>
+    <string name="chip_steps">How many steps?</string>
+    <string-array name="pip_quips">
+        <item>Hey! That tickles.</item>
+        <item>Tucking that into my pocket.</item>
+        <item>Small agent, big pocket. That\'s me.</item>
+        <item>Ready. Well… almost. No, ready!</item>
+        <item>A free wink.</item>
+        <item>I grow a little every day.</item>
+    </string-array>
+    <string name="lock_screen_line">Pip has something for you.</string>
 </resources>

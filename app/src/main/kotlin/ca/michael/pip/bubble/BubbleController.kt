@@ -6,12 +6,15 @@ import android.content.Intent
 import android.graphics.PixelFormat
 import android.provider.Settings
 import android.view.Gravity
+import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
 import android.view.WindowManager
 import android.widget.ImageView
 import ca.michael.pip.R
+import ca.michael.pip.pip
+import ca.michael.pip.screen.PipAccessibilityService
 import ca.michael.pip.ui.MainActivity
 import kotlin.math.abs
 
@@ -47,30 +50,47 @@ class BubbleController(private val context: Context) {
             x = prefs.getInt("x", 0)
             y = prefs.getInt("y", (240 * density).toInt())
         }
+        clamp(params)
         val bubble = ImageView(context).apply {
             setImageResource(R.mipmap.ic_launcher)
             contentDescription = context.getString(R.string.bubble_desc)
             setOnClickListener { openTalking() }
         }
         val slop = ViewConfiguration.get(context).scaledTouchSlop
-        var downX = 0f; var downY = 0f; var startX = 0; var startY = 0; var dragging = false
+        var downX = 0f; var downY = 0f; var startX = 0; var startY = 0; var dragging = false; var longPressed = false
+        // FR-B.6: a long press is the owner's explicit « regarde l'écran » for the app underneath.
+        val longPress = Runnable {
+            longPressed = true
+            bubble.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+            lookAndTalk()
+        }
         bubble.setOnTouchListener { v, e ->
             when (e.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
-                    downX = e.rawX; downY = e.rawY; startX = params.x; startY = params.y; dragging = false
+                    downX = e.rawX; downY = e.rawY; startX = params.x; startY = params.y; dragging = false; longPressed = false
+                    v.postDelayed(longPress, ViewConfiguration.getLongPressTimeout().toLong())
                     true
                 }
                 MotionEvent.ACTION_MOVE -> {
                     val dx = e.rawX - downX; val dy = e.rawY - downY
-                    if (!dragging && (abs(dx) > slop || abs(dy) > slop)) dragging = true
+                    if (!dragging && (abs(dx) > slop || abs(dy) > slop)) { dragging = true; v.removeCallbacks(longPress) }
                     if (dragging) {
                         params.x = startX + dx.toInt(); params.y = startY + dy.toInt()
-                        wm.updateViewLayout(v, params)
+                        clamp(params)
+                        if (v.isAttachedToWindow) wm.updateViewLayout(v, params)
                     }
                     true
                 }
                 MotionEvent.ACTION_UP -> {
-                    if (dragging) prefs.edit().putInt("x", params.x).putInt("y", params.y).apply() else v.performClick()
+                    v.removeCallbacks(longPress)
+                    when {
+                        dragging -> prefs.edit().putInt("x", params.x).putInt("y", params.y).apply()
+                        !longPressed -> v.performClick()
+                    }
+                    true
+                }
+                MotionEvent.ACTION_CANCEL -> {
+                    v.removeCallbacks(longPress)
                     true
                 }
                 else -> false
@@ -81,8 +101,22 @@ class BubbleController(private val context: Context) {
     }
 
     fun hide() {
-        view?.let { wm.removeView(it) }
+        // Never let a detached view crash Stop.
+        view?.let { try { wm.removeView(it) } catch (e: IllegalArgumentException) { } }
         view = null
+    }
+
+    /** Keeps the bubble on screen after a rotation, a fold or a display-size change. */
+    private fun clamp(p: WindowManager.LayoutParams) {
+        val bounds = wm.currentWindowMetrics.bounds
+        p.x = p.x.coerceIn(0, (bounds.width() - p.width).coerceAtLeast(0))
+        p.y = p.y.coerceIn(0, (bounds.height() - p.height).coerceAtLeast(0))
+    }
+
+    /** Reads the app under the bubble (never Pip's own windows), then opens Pip listening with it. */
+    private fun lookAndTalk() {
+        context.pip.bubbleLook = PipAccessibilityService.capture()
+        openTalking()
     }
 
     private fun openTalking() {

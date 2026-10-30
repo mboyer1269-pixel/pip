@@ -251,4 +251,29 @@
     <string name="bubble_toggle">Afficher la bulle de Pip par-dessus les autres apps</string>
     <string name="bubble_note">Touche la bulle pour me parler, glisse-la pour la déplacer. Elle n\'est là que quand je suis allumé.</string>
     <string name="bubble_desc">Pip — touche pour me parler</string>
+
+    <!-- Push to talk, bubble look, fun pack -->
+    <string name="action_talk">Parler</string>
+    <string name="assistant_section">Bouton pour parler</string>
+    <string name="assistant_button">Faire de Pip l\'assistant</string>
+    <string name="assistant_note">Choisis Pip comme assistant numérique : un appui long sur ton bouton (accueil ou alimentation, selon ton téléphone) m\'ouvre en écoute.</string>
+    <string name="looked_ready">J\'ai lu l\'écran que tu m\'as montré. Dis-moi ce que tu veux savoir.</string>
+    <string name="face_desc">Pip — touche-moi</string>
+    <string name="greet_morning">Bon matin ! Pip est réveillé, prêt quand tu l\'es.</string>
+    <string name="greet_afternoon">Allô ! Pip est dans ta poche, on y va quand tu veux.</string>
+    <string name="greet_evening">Bonsoir ! Pip est encore là si t\'as besoin.</string>
+    <string name="greet_night">Il est tard… Pip chuchote : je suis là.</string>
+    <string name="chip_tomorrow">Qu\'est-ce que j\'ai demain ?</string>
+    <string name="chip_notifications">Résume mes notifications</string>
+    <string name="chip_calls">Qui m\'a appelé ?</string>
+    <string name="chip_steps">Combien de pas ?</string>
+    <string-array name="pip_quips">
+        <item>Hé ! Ça chatouille.</item>
+        <item>Je range tout ça dans ma poche.</item>
+        <item>Petit agent, grande poche. C\'est moi, ça.</item>
+        <item>Prêt. Enfin… presque. Non, prêt !</item>
+        <item>Un clin d\'œil, gratuit.</item>
+        <item>Je pousse un peu chaque jour.</item>
+    </string-array>
+    <string name="lock_screen_line">Pip a quelque chose pour toi.</string>
 </resources>

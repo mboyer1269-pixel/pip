@@ -251,6 +251,22 @@ Title: the S7 line « Pip attend ton oui — sans lui, rien ne bouge. » /
 | Read actions | Ce que je lis part à mon cerveau pour cette réponse seulement. Si tu refuses, rien ne part. | What I read goes to my brain for this answer only. If you refuse, nothing leaves. |
 | Permission refused | Sans cette permission, je ne peux pas le faire. Rien n'a été fait. | Without that permission I can't do it. Nothing was done. |
 
+### Fun pack (personality, local only)
+
+| Moment | FR | EN |
+|---|---|---|
+| Greeting, morning | Bon matin ! Pip est réveillé, prêt quand tu l'es. | Good morning! Pip is awake, ready when you are. |
+| Greeting, afternoon | Allô ! Pip est dans ta poche, on y va quand tu veux. | Hi! Pip is in your pocket, ready when you are. |
+| Greeting, evening | Bonsoir ! Pip est encore là si t'as besoin. | Good evening! Pip is still here if you need me. |
+| Greeting, night | Il est tard… Pip chuchote : je suis là. | It's late… Pip whispers: I'm here. |
+| Tap on the face (random) | Hé ! Ça chatouille. · Je range tout ça dans ma poche. · Petit agent, grande poche. C'est moi, ça. · Prêt. Enfin… presque. Non, prêt ! · Un clin d'œil, gratuit. · Je pousse un peu chaque jour. | Hey! That tickles. · Tucking that into my pocket. · Small agent, big pocket. That's me. · Ready. Well… almost. No, ready! · A free wink. · I grow a little every day. |
+| Bubble long press | J'ai lu l'écran que tu m'as montré. Dis-moi ce que tu veux savoir. | I read the screen you showed me. Tell me what you want to know. |
+| Lock screen (private text hidden) | Pip a quelque chose pour toi. | Pip has something for you. |
+| S1 action | Parler | Talk |
+| Suggestion chips | Qu'est-ce que j'ai demain ? · Résume mes notifications · Qui m'a appelé ? · Combien de pas ? | What do I have tomorrow? · Sum up my notifications · Who called me? · How many steps? |
+
+The face winks for two seconds after an approved action ran, and when tapped.
+
 ## 5. Visual identity — direction A+B "Le pépin dans la poche"
 
 ### 5.1 Mark

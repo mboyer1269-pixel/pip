@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
 import android.widget.RadioButton
 import android.widget.RadioGroup
@@ -57,7 +58,20 @@ class MainActivity : Activity(), VoiceController.Listener {
 
     /** The snapshot attached to the last turn, shown on request (FR-3.5). */
     private var lastTurnSnapshot: String? = null
-    private val onState: () -> Unit = { render() }
+    /** Set when a gesture asked to talk while Pip was still starting (push to talk). */
+    private var pendingTalk = false
+    /** Screen text read by a bubble long press, attached to the next turn only. */
+    private var pendingSnapshot: String? = null
+    /** Pip's face winks until this time (fun pack: success, tap on the face). */
+    private var winkUntil = 0L
+
+    private val onState: () -> Unit = {
+        render()
+        if (pendingTalk && pip.state.running) {
+            pendingTalk = false
+            onTalk()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,9 +79,12 @@ class MainActivity : Activity(), VoiceController.Listener {
         actions = DeviceActionRunner(this)
         val col = Ui.screen(this, R.string.app_name)
 
-        face = PipFaceView(this)
+        face = PipFaceView(this).apply {
+            contentDescription = getString(R.string.face_desc)
+            setOnClickListener { onFaceTapped() }
+        }
         col.addView(face, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, Ui.dp(this, 170)))
-        col.addView(Ui.text(this, getString(R.string.greeting)))
+        col.addView(Ui.text(this, Fun.greeting(this)))
         onOff = Ui.button(this, "") { toggleRunning() }.also { col.addView(it) }
         hint = Ui.text(this, "", 14f).also { col.addView(it) }
         indicators = Ui.text(this, "", 14f).also { col.addView(it) }
@@ -82,6 +99,13 @@ class MainActivity : Activity(), VoiceController.Listener {
             col.addView(it, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, Ui.dp(this, 72)))
         }
         interrupt = Ui.button(this, getString(R.string.interrupt)) { voiceIo.stopSpeaking() }.also { col.addView(it) }
+
+        // Suggestion chips: each one only starts a normal turn (actions still go through S10).
+        val chips = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        for (res in Fun.CHIPS) {
+            chips.addView(Ui.button(this, getString(res)) { runTurn(getString(res)) })
+        }
+        col.addView(HorizontalScrollView(this).apply { addView(chips) })
 
         input = EditText(this).apply { setHint(R.string.type_hint) }
         col.addView(Ui.row(this, input))
@@ -117,10 +141,33 @@ class MainActivity : Activity(), VoiceController.Listener {
         super.onResume()
         pip.state.addListener(onState)
         render()
-        if (intent.getBooleanExtra(EXTRA_TALK, false)) {
-            intent.removeExtra(EXTRA_TALK)
-            if (pip.state.running) onTalk()
+        consumeGesture()
+    }
+
+    /**
+     * Push to talk (SPEC 16): the bubble, the S1 « Parler » action and the
+     * system assistant gesture all land here. The gesture is the owner's
+     * explicit request, so Pip turns on if needed, then listens.
+     */
+    private fun consumeGesture() {
+        val assist = intent.action == Intent.ACTION_ASSIST
+        val talk = intent.getBooleanExtra(EXTRA_TALK, false)
+        if (!assist && !talk) return
+        setIntent(Intent(intent).setAction(null).apply { removeExtra(EXTRA_TALK) })
+
+        // A long press on the bubble may have read the screen for this turn (FR-B.6).
+        when (val look = pip.bubbleLook.also { pip.bubbleLook = null }) {
+            is Capture.Ok -> {
+                pendingSnapshot = look.text
+                pip.lastOwnerSnapshot = look.text
+                lastTurnSnapshot = look.text
+                pipLine.setText(R.string.looked_ready)
+            }
+            Capture.ServiceOff -> pipLine.setText(R.string.err_screen_off)
+            Capture.NoOtherApp -> pipLine.setText(R.string.err_no_other_app)
+            null -> {}
         }
+        if (pip.state.running) onTalk() else { pendingTalk = true; toggleRunning() }
     }
 
     override fun onPause() {
@@ -132,6 +179,11 @@ class MainActivity : Activity(), VoiceController.Listener {
     }
 
     override fun onDestroy() {
+        // Nothing may come back to a destroyed screen: drop the turn and any open card.
+        turnGeneration++
+        openCard?.dismiss()
+        openCard = null
+        pip.cancelBrain()
         voiceIo.release()
         super.onDestroy()
     }
@@ -143,6 +195,12 @@ class MainActivity : Activity(), VoiceController.Listener {
         if (!s.running) {
             voiceIo.cancelListening()
             voiceIo.stopSpeaking()
+            // FR-1.3: Stop also closes any S10 card; nothing approved later can run.
+            if (openCard != null) {
+                turnGeneration++
+                openCard?.dismiss()
+                openCard = null
+            }
         }
         onOff.setText(if (s.running) R.string.turn_off else R.string.turn_on)
         hint.text = if (s.running) "" else getString(R.string.pip_off_hint)
@@ -161,6 +219,7 @@ class MainActivity : Activity(), VoiceController.Listener {
         talk.setText(if (s.voice == VoiceState.LISTENING) R.string.talk_listening else R.string.talk)
         interrupt.visibility = if (s.voice == VoiceState.SPEAKING) View.VISIBLE else View.GONE
         face.mood = when {
+            System.currentTimeMillis() < winkUntil -> PipFaceView.Mood.SUCCESS
             !s.running -> PipFaceView.Mood.STOPPING
             pip.broker.pending().isNotEmpty() -> PipFaceView.Mood.WAITING
             s.voice == VoiceState.LISTENING -> PipFaceView.Mood.LISTENING
@@ -216,6 +275,7 @@ class MainActivity : Activity(), VoiceController.Listener {
             }
             REQ_MIC -> if (granted) voiceIo.startListening() else pipLine.setText(R.string.err_mic_refused)
             REQ_NOTIFICATIONS -> if (granted) startPip() else {
+                pendingTalk = false
                 hint.setText(R.string.notif_denied_explain)
                 open(SetupActivity::class.java)
             }
@@ -249,8 +309,9 @@ class MainActivity : Activity(), VoiceController.Listener {
         pipLine.text = ""
 
         // Screen context only when asked on this turn (FR-3.1).
-        var snapshot: String? = null
-        if (screenToggle.isChecked || TextMatch.asksForScreen(words)) {
+        var snapshot: String? = pendingSnapshot
+        pendingSnapshot = null
+        if (snapshot == null && (screenToggle.isChecked || TextMatch.asksForScreen(words))) {
             when (val c = PipAccessibilityService.capture()) {
                 is Capture.Ok -> {
                     snapshot = c.text
@@ -287,21 +348,26 @@ class MainActivity : Activity(), VoiceController.Listener {
 
     private fun send(words: String, snapshot: String?, excerpt: String?) {
         pip.state.update { voice = VoiceState.THINKING }
-        pip.askBrain(words, snapshot, excerpt, ::onBrain)
+        val generation = turnGeneration
+        pip.askBrain(words, snapshot, excerpt) { turn, result -> onBrain(turn, result, generation) }
     }
 
-    private fun onBrain(turn: PipRuntime.Turn, result: BrainResult) {
+    private fun onBrain(turn: PipRuntime.Turn, result: BrainResult, generation: Int) {
+        // A result for an older turn is dropped (FR-A.6).
+        if (generation != turnGeneration || isDestroyed) return
         when (result) {
             is BrainResult.Answer -> speakAnswer(turn.words, result.text)
             is BrainResult.ActionRequest -> {
                 pip.state.update { voice = VoiceState.READY }
                 result.text?.let { pipLine.text = getString(R.string.pip_label) + " : " + it }
+                // FR-A.9: with actions off, proposals are ignored even if a server sends them anyway.
+                if (!pip.settings.actionsEnabled && turn.round == 0) return
                 if (turn.round >= ActionCatalog.MAX_ROUNDS) {
                     // FR-A.6: no more rounds for this turn.
                     if (result.text == null) pipLine.setText(R.string.act_round_limit)
                     return
                 }
-                handleActions(turn, result, turnGeneration)
+                handleActions(turn, result, generation)
             }
             else -> {
                 pip.state.update { voice = VoiceState.READY }
@@ -329,7 +395,7 @@ class MainActivity : Activity(), VoiceController.Listener {
             if (generation != turnGeneration) return // FR-A.6: a new turn cancels what was waiting.
             if (i == calls.size) {
                 pip.state.update { voice = VoiceState.THINKING }
-                pip.continueTurn(turn, request.assistant, results, ::onBrain)
+                pip.continueTurn(turn, request.assistant, results) { t, r -> onBrain(t, r, generation) }
                 return
             }
             val call = calls[i]
@@ -371,7 +437,11 @@ class MainActivity : Activity(), VoiceController.Listener {
                                 pipLine.setText(R.string.act_permission_refused)
                                 done("permission refused by the owner")
                             } else {
-                                actions.execute(prepared, choice, done)
+                                if (!pip.state.running || generation != turnGeneration) return@withPermissions
+                                actions.execute(prepared, choice) { result ->
+                                    if (!result.startsWith("failed")) wink()
+                                    done(result)
+                                }
                             }
                         }
                     }
@@ -382,6 +452,7 @@ class MainActivity : Activity(), VoiceController.Listener {
 
     /** S10: one action in Pip's words; Approve armed after 1 s; no "always" (FR-A.2, FR-A.3). */
     private fun showCard(p: DeviceActionRunner.Prepared.Ready, decided: (Boolean, DeviceActionRunner.Contact?) -> Unit) {
+        if (isFinishing || isDestroyed) return
         val pad = Ui.dp(this, 20)
         val box = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(pad, pad, pad, 0) }
         box.addView(Ui.text(this, p.description))
@@ -426,6 +497,19 @@ class MainActivity : Activity(), VoiceController.Listener {
         if (missing.isEmpty()) { then(true); return }
         permissionCallback = then
         requestPermissions(missing.toTypedArray(), REQ_ACTION)
+    }
+
+    // --- Fun pack: Pip's personality (no permission, nothing sent) ---
+
+    private fun wink(ms: Long = 2_000) {
+        winkUntil = System.currentTimeMillis() + ms
+        render()
+        face.postDelayed({ render() }, ms + 50)
+    }
+
+    private fun onFaceTapped() {
+        wink(1_200)
+        pipLine.text = getString(R.string.pip_label) + " : " + Fun.quip(this)
     }
 
     /** FR-4.4 / FR-4.5: each failure in its own honest words. */

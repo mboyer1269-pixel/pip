@@ -1,6 +1,6 @@
 # Push to talk — short design
 
-Status: **draft, waiting for the owner's approval** (2026-10-30).
+Status: **approved** by the owner's `/goal` of 2026-10-30 (both calls accepted).
 Size: small change.
 
 ## Intent

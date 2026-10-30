@@ -40,6 +40,8 @@ class PipAccessibilityService : AccessibilityService() {
         super.onDestroy()
     }
 
+    private var budget = 0
+
     override fun onAccessibilityEvent(event: AccessibilityEvent?) {
         // Deliberately empty: nothing is read in response to events.
     }
@@ -56,6 +58,7 @@ class PipAccessibilityService : AccessibilityService() {
             .mapNotNull { it.root }
             .firstOrNull { it.packageName?.toString() != own }
             ?: return Capture.NoOtherApp
+        budget = MAX_NODES_READ
         val tree = convert(root, parentIsList = false, depth = 0)
         val time = Instant.now().truncatedTo(ChronoUnit.SECONDS).toString()
         return Capture.Ok(SnapshotFormatter.format(root.packageName?.toString() ?: "?", time, tree))
@@ -63,9 +66,11 @@ class PipAccessibilityService : AccessibilityService() {
 
     private fun convert(node: AccessibilityNodeInfo, parentIsList: Boolean, depth: Int): SnapshotNode {
         val role = roleOf(node, parentIsList)
-        val children = if (depth >= MAX_DEPTH || node.isPassword) emptyList() else
+        // A global budget keeps a huge screen (feed, web page) from freezing Pip.
+        budget--
+        val children = if (depth >= MAX_DEPTH || node.isPassword || budget <= 0) emptyList() else
             (0 until minOf(node.childCount, MAX_CHILDREN)).mapNotNull { i ->
-                node.getChild(i)?.let { convert(it, role == Role.LIST, depth + 1) }
+                if (budget <= 0) null else node.getChild(i)?.let { convert(it, role == Role.LIST, depth + 1) }
             }
         return SnapshotNode(
             role = role,
@@ -98,6 +103,7 @@ class PipAccessibilityService : AccessibilityService() {
     companion object {
         private const val MAX_DEPTH = 30
         private const val MAX_CHILDREN = 100
+        private const val MAX_NODES_READ = 600
         @Volatile private var instance: WeakReference<PipAccessibilityService>? = null
 
         fun isOn(): Boolean = instance?.get() != null
