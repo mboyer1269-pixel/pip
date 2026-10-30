@@ -371,6 +371,10 @@ sending SMS or placing calls.
 `system_asr_opt_in`, `speech_language`, `speak_answers`, `actions_enabled`, `bubble_enabled`. No default values
 are inherited from anywhere; Phase B sets them and lists them in the README.
 
+**App language.** Pip declares the languages it ships (French, English), so
+the owner can pick Pip's language in Android's own per-app language screen
+(Android 13+). It is not a Pip setting; it follows the device by default.
+
 ## 10. Acceptance tests (minimum for Phases 5–7)
 
 | ID | Test |

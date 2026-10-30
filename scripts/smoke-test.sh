@@ -47,7 +47,8 @@ adb logcat -b crash -c || true
 
 adb install -r -g "$apk"
 echo "ok   installed (all runtime permissions granted with -g)"
-adb shell cmd locale set-app-locales "$pkg" --locales fr-CA >/dev/null
+adb shell cmd locale set-app-locales "$pkg" --locales fr >/dev/null
+echo "info app locale: $(adb shell cmd locale get-app-locales "$pkg" 2>&1 | tr -d "\r")"
 
 adb shell am start -W -n "$pkg/ca.michael.pip.ui.MainActivity" >/dev/null
 sleep 3
@@ -105,7 +106,7 @@ wait_text "Allumer Pip" || { ui_labels; false; } || fail "home does not offer «
 echo "ok   home shows « Allumer Pip » (FR)"
 
 # English strings (values-en) load when the app locale is English.
-adb shell cmd locale set-app-locales "$pkg" --locales en-US >/dev/null
+adb shell cmd locale set-app-locales "$pkg" --locales en >/dev/null
 adb shell am force-stop "$pkg"
 adb shell am start -W -n "$pkg/ca.michael.pip.ui.MainActivity" >/dev/null
 wait_text "Turn Pip on" || { ui_labels; false; } || fail "English home string (Turn Pip on) not shown"
