@@ -127,6 +127,25 @@ The problem: when Pip fills the screen, there is no other app to read
   artifact `pip-debug-apk`
   <https://github.com/mboyer1269-pixel/pip/actions/runs/40984343136/artifacts/12946248137>.
 
+## Task 7 — Device smoke test in CI (added after the goal check)
+
+Nothing had run on a real Android system before this. Owner device tests stay
+the reference, but CI should catch crashes first.
+- [x] `scripts/smoke-test.sh` is written. It runs on an emulator and checks:
+  - the app launches;
+  - `ASSIST` turns Pip on (foreground `PipService` and S1);
+  - the crash buffer stays empty.
+- [x] Gates rerun on the merged `bb9e499`: clean-room exit 0, permissions
+  exit 0, `:core:test` 48/48.
+- [x] CI `smoke` job green on the PR head (run 40995340777, `cab472b`).
+  - The first run failed on the test script, not on Pip: the short
+    `dumpsys` output has no `isForeground` field, and the check ran before
+    `startForeground`. Fixed in `cab472b`.
+  - Log on the emulator (API 34): `ok installed`, `ok launched`,
+    `ok ASSIST turned Pip on (foreground service running)`,
+    `ok S1 notification posted`, `ok no crash`, `SMOKE PASS`.
+  - Merge after CI is green on this commit.
+
 ## Out of scope (stated, not built)
 
 - Wake word: the owner chose push-to-talk.
