@@ -568,9 +568,9 @@ Design: `docs/superpowers/specs/2026-10-30-push-to-talk-design.md`.
 
 | ID | Question | Status |
 |---|---|---|
-| Q-1 | Orchestrator hostname for the build allowlist (ACP-3) | **Open** — needed by Phase 6; until answered the allowlist is empty and the ACP client refuses to connect |
+| Q-1 | Orchestrator hostname for the build allowlist (ACP-3) | **Deferred by the owner (2026-10-30):** no server yet. The allowlist stays empty and the ACP client refuses to connect; reopen when the owner gives a hostname |
 | Q-2 | No overlay permission in v1 (section 5); the overlay step is removed from the install instructions | **Confirmed by owner, 2026-10-29**; superseded 2026-10-30 by the owner's GO for the bubble (section 15), which is off by default |
 | Q-3 | Freshness window of 120 seconds (ACP-12) | **Confirmed by owner, 2026-10-29** |
 | Q-4 | On-device recognizer first; system recognizer only after a one-time opt-in (FR-2.2) | **Confirmed by owner, 2026-10-29** |
 | Q-5 | How to read the screen when Pip fills it | **Resolved 2026-10-30** by the bubble long press (FR-B.6), under the owner's `/goal` |
-| Q-6 | Swiping S1 away: re-post or stop Pip | Open — current behavior re-posts S1 (FR-1.2) |
+| Q-6 | Swiping S1 away: re-post or stop Pip | **Resolved by the owner (2026-10-30):** re-post S1 (FR-1.2). Only the Stop action turns Pip off |
