@@ -108,10 +108,19 @@ class MainActivity : Activity(), VoiceController.Listener {
         ))
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+    }
+
     override fun onResume() {
         super.onResume()
         pip.state.addListener(onState)
         render()
+        if (intent.getBooleanExtra(EXTRA_TALK, false)) {
+            intent.removeExtra(EXTRA_TALK)
+            if (pip.state.running) onTalk()
+        }
     }
 
     override fun onPause() {
@@ -445,6 +454,8 @@ class MainActivity : Activity(), VoiceController.Listener {
     }
 
     companion object {
+        /** Set by the bubble: open Pip listening (FR-B.4). */
+        const val EXTRA_TALK = "ca.michael.pip.extra.TALK"
         private const val REQ_MIC = 1
         private const val REQ_NOTIFICATIONS = 2
         private const val REQ_ACTION = 3
