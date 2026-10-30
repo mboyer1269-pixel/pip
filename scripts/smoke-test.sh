@@ -5,8 +5,10 @@
 #   2. the push-to-talk gesture (ASSIST intent, SPEC 16) turns Pip on:
 #      PipService runs in the foreground and S1 is posted (V1-1, FR-P.3);
 #   3. the Stop action on S1 stops Pip (FR UI), and the home screen says so;
-#   4. the English strings load when the app locale is English;
-#   5. the crash buffer stays empty for the app.
+#   4. the bubble (SPEC 15) shows over another app once enabled, and a tap
+#      on it brings Pip to the front;
+#   5. the English strings load when the app locale is English;
+#   6. the crash buffer stays empty for the app.
 # Usage: scripts/smoke-test.sh path/to/app-debug.apk
 set -euo pipefail
 apk="$1"
@@ -38,6 +40,17 @@ except ET.ParseError: print("(no UI dump)"); sys.exit(0)
 seen = [l for n in root.iter("node") for l in (n.get("text", ""), n.get("content-desc", "")) if l.strip()]
 print("visible: " + " | ".join(seen))
 '
+}
+# scroll_to_text: wait_text, swiping up between tries (long screens).
+scroll_to_text() {
+  size="$(adb shell wm size | grep -oE '[0-9]+x[0-9]+' | tail -n 1 || true)"; [ -n "$size" ] || size=1080x1920
+  w="${size%x*}"; h="${size#*x}"
+  for i in 1 2 3 4 5 6; do
+    xy="$(find_text "$1")"; [ -n "$xy" ] && return 0
+    adb shell input swipe $((w / 2)) $((h * 3 / 4)) $((w / 2)) $((h / 4)) 300
+    sleep 1
+  done
+  return 1
 }
 wait_text() { for i in $(seq 1 15); do xy="$(find_text "$1")"; [ -n "$xy" ] && return 0; sleep 1; done; return 1; }
 
@@ -120,6 +133,47 @@ echo "ok   Stop on S1 stopped Pip"
 adb shell am start -W -n "$pkg/ca.michael.pip.ui.MainActivity" >/dev/null
 wait_text "Allumer Pip" || { ui_labels; false; } || fail "home does not offer « Allumer Pip » after Stop"
 echo "ok   home shows « Allumer Pip » (FR)"
+
+# Bubble (SPEC 15). The overlay permission is pre-granted here; on the phone the
+# owner grants it in Android's own screen (FR-B.2).
+adb shell appops set "$pkg" SYSTEM_ALERT_WINDOW allow
+adb shell input tap $xy   # « Allumer Pip », found just above
+scroll_to_text "Réglages" || { ui_labels; fail "home has no « Réglages » button"; }
+adb shell input tap $xy
+scroll_to_text "Afficher la bulle de Pip par-dessus les autres apps" || { ui_labels; fail "bubble toggle not found in Réglages"; }
+adb shell input tap $xy
+sleep 2
+adb shell input keyevent KEYCODE_HOME
+bubble_xy=""
+for i in $(seq 1 15); do
+  bubble_xy="$(adb shell dumpsys window windows | python3 -c '
+import re, sys
+pkg = sys.argv[1]
+for block in sys.stdin.read().split("Window #")[1:]:
+    if "APPLICATION_OVERLAY" in block and pkg in block:
+        m = re.search(r"(?:mFrame|\bframe)=\[(-?\d+),(-?\d+)\]\[(-?\d+),(-?\d+)\]", block)
+        if m:
+            x1, y1, x2, y2 = map(int, m.groups())
+            print((x1 + x2) // 2, (y1 + y2) // 2); break
+' "$pkg")"
+  [ -n "$bubble_xy" ] && break
+  sleep 1
+done
+if [ -z "$bubble_xy" ]; then
+  adb shell dumpsys window windows | grep -E "Window #|ty=|mFrame=" | grep -B1 -A1 -iE "overlay|$pkg" | head -40 || true
+  fail "bubble overlay window not shown over the launcher"
+fi
+echo "ok   bubble shown over another app (at $bubble_xy)"
+adb shell input tap $bubble_xy
+top=""
+for i in $(seq 1 10); do
+  acts="$(adb shell dumpsys activity activities)"
+  top="$(grep -E "topResumedActivity|mResumedActivity" <<<"$acts" | head -n 1 | tr -d "\r" || true)"
+  grep -q "$pkg/ca.michael.pip.ui.MainActivity" <<<"$top" && break
+  sleep 1
+done
+grep -q "$pkg/ca.michael.pip.ui.MainActivity" <<<"$top" || fail "tap on the bubble did not bring Pip to the front ($top)"
+echo "ok   tap on the bubble opened Pip"
 
 # English strings (values/) load when the app locale is English.
 adb shell cmd locale set-app-locales "$pkg" --locales en >/dev/null
