@@ -92,14 +92,29 @@ if ! wait_text "Arrêter"; then
     wait_text "Arrêter" || { ui_labels; fail "S1 Stop action (Arrêter) not visible in the shade"; }
   fi
 fi
-adb shell input tap $xy
-adb shell cmd statusbar collapse
-for i in $(seq 1 15); do
-  dump="$(adb shell dumpsys activity services "$pkg")"
-  grep -q "PipService" <<<"$dump" || break
-  sleep 1
+# Tap only once the position is stable (two identical reads: the shade may
+# still be settling), then check Pip stopped. Up to 3 taps; each is logged.
+stopped=no
+for attempt in 1 2 3; do
+  prev=""
+  for i in $(seq 1 10); do
+    xy="$(find_text "Arrêter")"
+    [ -n "$xy" ] && [ "$xy" = "$prev" ] && break
+    prev="$xy"; sleep 1
+  done
+  [ -n "$xy" ] || break
+  echo "info tap Arrêter at $xy (attempt $attempt)"
+  adb shell input tap $xy
+  for i in $(seq 1 10); do
+    dump="$(adb shell dumpsys activity services "$pkg")"
+    grep -q "PipService" <<<"$dump" || { stopped=yes; break; }
+    sleep 1
+  done
+  [ "$stopped" = yes ] && break
+  adb shell cmd statusbar expand-notifications
 done
-grep -q "PipService" <<<"$dump" && fail "PipService still running after Stop"
+adb shell cmd statusbar collapse
+[ "$stopped" = yes ] || { ui_labels; fail "PipService still running after Stop"; }
 echo "ok   Stop on S1 stopped Pip"
 
 adb shell am start -W -n "$pkg/ca.michael.pip.ui.MainActivity" >/dev/null
