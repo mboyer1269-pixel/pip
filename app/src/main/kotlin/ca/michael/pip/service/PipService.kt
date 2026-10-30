@@ -9,6 +9,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.widget.Toast
 import ca.michael.pip.R
+import ca.michael.pip.bubble.BubbleController
 import ca.michael.pip.pip
 import java.time.Instant
 
@@ -19,6 +20,7 @@ import java.time.Instant
 class PipService : Service() {
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var notifications: PipNotifications
+    private lateinit var bubble: BubbleController
     private val notifiedReminders = HashSet<String>()
     private var ticks = 0L
 
@@ -43,6 +45,7 @@ class PipService : Service() {
     override fun onCreate() {
         super.onCreate()
         notifications = PipNotifications(this).also { it.createChannels() }
+        bubble = BubbleController(this)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -54,6 +57,11 @@ class PipService : Service() {
             ACTION_REPOST -> {
                 // The owner swiped S1 away while Pip runs: S1 must stay (FR-1.2). Stop is on it.
                 if (pip.state.running) notifications.refreshStatus()
+                return START_NOT_STICKY
+            }
+            ACTION_BUBBLE -> {
+                // FR-B.3: the bubble exists only while Pip runs.
+                if (pip.state.running) bubble.sync(pip.settings.bubbleEnabled) else stopSelf()
                 return START_NOT_STICKY
             }
         }
@@ -70,10 +78,12 @@ class PipService : Service() {
             announceOverdue()
             handler.post(ticker)
         }
+        bubble.sync(pip.settings.bubbleEnabled)
         return START_NOT_STICKY
     }
 
     override fun onDestroy() {
+        bubble.hide()
         handler.removeCallbacksAndMessages(null)
         pip.state.removeListener(onStateChange)
         pip.broker.removeListener(onBrokerChange)
@@ -86,6 +96,7 @@ class PipService : Service() {
 
     /** FR-1.3, in order: tasks cancelled and journaled, ACP closed, brain cancelled, notification removed. */
     private fun stopPip() {
+        bubble.hide()
         handler.removeCallbacksAndMessages(null)
         pip.stopAll()
         notifications.taskPending(false)
@@ -118,6 +129,14 @@ class PipService : Service() {
     companion object {
         const val ACTION_STOP = "ca.michael.pip.action.STOP"
         const val ACTION_REPOST = "ca.michael.pip.action.REPOST"
+        const val ACTION_BUBBLE = "ca.michael.pip.action.BUBBLE"
+
+        /** Asks a running Pip to show or hide the bubble after a settings change. */
+        fun syncBubble(context: Context) {
+            if (context.pip.state.running) {
+                context.startService(Intent(context, PipService::class.java).setAction(ACTION_BUBBLE))
+            }
+        }
         private const val REMINDER_EVERY_TICKS = 30L
 
         fun start(context: Context) {

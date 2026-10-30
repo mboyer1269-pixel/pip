@@ -1,7 +1,10 @@
 package ca.michael.pip.ui
 
 import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.text.InputType
 import android.widget.CheckBox
 import android.widget.EditText
@@ -12,6 +15,7 @@ import ca.michael.pip.R
 import ca.michael.pip.core.brain.BrainResult
 import ca.michael.pip.core.brain.BrainUrl
 import ca.michael.pip.pip
+import ca.michael.pip.service.PipService
 
 /** S4 — Settings › Brain, plus the voice settings of SPEC section 9. */
 class BrainSettingsActivity : Activity() {
@@ -20,6 +24,12 @@ class BrainSettingsActivity : Activity() {
     private lateinit var key: EditText
     private lateinit var keyState: TextView
     private lateinit var feedback: TextView
+
+    override fun onResume() {
+        super.onResume()
+        // Back from the system overlay screen: show or hide the bubble accordingly.
+        PipService.syncBubble(this)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,6 +63,22 @@ class BrainSettingsActivity : Activity() {
             renderKey()
         })
         feedback = Ui.text(this, "", 15f).also { col.addView(it) }
+
+        col.addView(Ui.spacer(this, 20))
+        col.addView(Ui.text(this, getString(R.string.bubble_section), 18f, bold = true))
+        col.addView(CheckBox(this).apply {
+            setText(R.string.bubble_toggle)
+            isChecked = s.bubbleEnabled
+            setOnCheckedChangeListener { _, on ->
+                s.bubbleEnabled = on
+                // FR-B.2: the system screen grants "Display over other apps".
+                if (on && !Settings.canDrawOverlays(this@BrainSettingsActivity)) {
+                    startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))
+                }
+                PipService.syncBubble(this@BrainSettingsActivity)
+            }
+        })
+        col.addView(Ui.text(this, getString(R.string.bubble_note), 13f))
 
         col.addView(Ui.spacer(this, 20))
         col.addView(Ui.text(this, getString(R.string.voice_section), 18f, bold = true))

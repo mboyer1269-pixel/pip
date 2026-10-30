@@ -49,6 +49,7 @@ cloche ? Il te le dit franchement : c'est juste un *petit pépin*.
 | 🧠 | Cerveau au choix | N'importe quel point d'accès compatible OpenAI, en `https://`, avec **ta** clé — scellée par le Keystore |
 | 📓 | Carnet | Notes, promesses, rappels — chiffré AES-GCM, consultable et effaçable par toi |
 | 📡 | Tâches à distance (ACP) | Connexion **sortante** `wss://` vers ton orchestrateur, enveloppes signées, quatre intentions seulement |
+| 🫧 | **Bulle** (bloc B) | Une petite poche flottante par-dessus les autres apps : touche-la pour parler à Pip. Optionnelle, visible seulement quand Pip est allumé |
 | 🔔 | **Notifications** (bloc C) | Pip lit et résume les notifications affichées, **seulement quand tu le demandes** et après ton oui — rien n'est lu à l'arrivée |
 | 📱 | **Actions sur le téléphone** (bloc A) | Appeler, texter, lire tes textos, appels, contacts, calendrier, position, pas ; ouvrir une app ; ajouter un événement — le cerveau propose, **tu approuves chaque action** |
 | 🛡️ | Permissions | Chacune demandée au moment où une action approuvée en a besoin, et justifiée dans [`PERMISSIONS.md`](PERMISSIONS.md) |
@@ -183,6 +184,7 @@ distribution, no release signing.
 | `app/.../screen/PipAccessibilityService.kt` | Read-only screen capture on request (V1-3) |
 | `app/.../acp/AcpConnection.kt` | Outbound WebSocket, verify-then-broker (V1-6) |
 | `app/.../actions/DeviceActionRunner.kt` | Block A: prepares each S10 card (local contact lookup) and runs approved actions |
+| `app/.../bubble/BubbleController.kt` | Block B: the optional floating bubble, only while Pip runs |
 | `app/.../notify/PipNotificationListener.kt` | Block C: reads shown notifications only for an approved action |
 | `app/.../acp/DeviceTaskExecutor.kt` | Runs the four approved intents |
 | `app/.../ui/MainActivity.kt` | S2 Home and S9 excerpt approval |
@@ -243,6 +245,7 @@ time limit on Android 15.
 | `speech_language` | plain prefs | `fr-CA` |
 | `speak_answers` | plain prefs | `true` |
 | `actions_enabled` | plain prefs | `true` (Block A; every action still needs approval on S10) |
+| `bubble_enabled` | plain prefs | `false` (Block B; needs "Display over other apps") |
 
 The brain endpoint is `<brain_base_url>/chat/completions` (for example a base
 URL ending in `/v1`).
@@ -375,8 +378,8 @@ The APK is never committed (`.gitignore`, gate check "apk in tree").
 3. Open **Pip (debug)** (icon with the small "D" badge).
 4. **Permissions** (S3): allow notifications (required). Microphone and
    Accessibility are optional; for Accessibility, Pip opens the system screen
-   — turn on "Pip — lecture d'écran". No overlay permission exists in v1
-   (SPEC Q-2).
+   — turn on "Pip — lecture d'écran". The bubble (SPEC 15) is optional: turn
+   it on in Réglages, then allow "Display over other apps".
 5. **Réglages › Cerveau** (S4): `https://` address of an OpenAI-compatible
    endpoint (base ending for example in `/v1`), model name, key. Tap
    **Tester**.

@@ -58,7 +58,7 @@ Guiding principles:
 ### 2.3 Observed elsewhere, deliberately not retained for v1
 
 Listed so Phase B does not reintroduce them by accident: an always-listening
-offline wake word; a floating on-screen avatar drawn over other apps; any
+offline wake word; any
 local network server; screenshots or screen recording; changing system input settings; a remote "hub" mode
 that hands the whole conversation to a server.
 
@@ -68,6 +68,9 @@ access; location; step counting; launching installed apps.
 
 Moved into **Block C** (section 14, owner GO 2026-10-30): reading other
 apps' notifications, on request.
+
+Moved into **Block B — bubble** (section 15, owner GO 2026-10-30): a
+floating Pip drawn over other apps.
 
 ## 3. Surfaces
 
@@ -201,9 +204,9 @@ checked **at the moment of use**, never all at startup.
 | `RECORD_AUDIO` | speech recognition | typing only |
 | `BIND_ACCESSIBILITY_SERVICE` (protects Pip's service; granted by the owner in system settings) | screen context | no screen context |
 
-Not requested: overlay (`SYSTEM_ALERT_WINDOW`) — no function draws over
-other apps; boot receiver; camera; `QUERY_ALL_PACKAGES`; usage-stats;
-secure-settings. Block A adds its own permissions (section 13.4).
+Not requested: boot receiver; camera; `QUERY_ALL_PACKAGES`; usage-stats;
+secure-settings. Block A adds its own permissions (section 13.4); the
+Block B bubble adds the overlay permission (section 15).
 
 ## 6. Data formats (defined for Pip)
 
@@ -365,7 +368,7 @@ sending SMS or placing calls.
 
 `brain_base_url`, `brain_model`, `brain_key` (encrypted), `acp_host`
 (chosen from the build allowlist), `acp_secret` (encrypted),
-`system_asr_opt_in`, `speech_language`, `speak_answers`, `actions_enabled`. No default values
+`system_asr_opt_in`, `speech_language`, `speak_answers`, `actions_enabled`, `bubble_enabled`. No default values
 are inherited from anywhere; Phase B sets them and lists them in the README.
 
 ## 10. Acceptance tests (minimum for Phases 5–7)
@@ -510,11 +513,34 @@ Package visibility: a `<queries>` entry for launcher activities
 | T-C1 | `read_notifications` validates `limit` and `app` like other actions |
 | T-C2 | With notification access off, the action says how to turn it on and sends nothing |
 
+## 15. Block B — the bubble (owner GO 2026-10-30)
+
+- FR-B.1 An optional floating bubble (Pip's pocket icon) drawn over other
+  apps, so the owner can reach Pip without opening it. **Off by default**;
+  the owner turns it on in Settings (`bubble_enabled`).
+- FR-B.2 It needs the system "Display over other apps" permission
+  (`SYSTEM_ALERT_WINDOW`), granted by the owner in system settings; Pip
+  opens that screen when the owner turns the bubble on.
+- FR-B.3 The bubble exists **only while Pip runs** (V1-1): it appears when
+  the service starts with the setting on, and disappears on Stop. It never
+  replaces the S1 notification, which stays as is.
+- FR-B.4 Tap: Pip opens and starts listening (same as Talk on S2). Drag:
+  moves the bubble; its place is remembered. The bubble reads nothing and
+  sends nothing by itself.
+- FR-B.5 The bubble window is not focusable and takes no input other than
+  taps and drags on itself.
+
+| ID | Test |
+|---|---|
+| T-B1 | Bubble off by default; turning it on without the permission opens the system screen |
+| T-B2 | With Pip stopped there is no bubble; Stop removes it |
+| T-B3 | Tapping the bubble opens Pip listening |
+
 ## 12. Owner questions
 
 | ID | Question | Status |
 |---|---|---|
 | Q-1 | Orchestrator hostname for the build allowlist (ACP-3) | **Open** — needed by Phase 6; until answered the allowlist is empty and the ACP client refuses to connect |
-| Q-2 | No overlay permission in v1 (section 5); the overlay step is removed from the install instructions | **Confirmed by owner, 2026-10-29** |
+| Q-2 | No overlay permission in v1 (section 5); the overlay step is removed from the install instructions | **Confirmed by owner, 2026-10-29**; superseded 2026-10-30 by the owner's GO for the bubble (section 15), which is off by default |
 | Q-3 | Freshness window of 120 seconds (ACP-12) | **Confirmed by owner, 2026-10-29** |
 | Q-4 | On-device recognizer first; system recognizer only after a one-time opt-in (FR-2.2) | **Confirmed by owner, 2026-10-29** |

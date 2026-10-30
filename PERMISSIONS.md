@@ -42,6 +42,12 @@ Location is read only while Pip is on screen, never in the background
 (no `ACCESS_BACKGROUND_LOCATION`). `uses-feature` entries for telephony,
 location and the step counter are marked `required="false"`.
 
+## Block B permission (SPEC 15)
+
+| Permission | Function | If refused | When asked |
+|---|---|---|---|
+| `android.permission.SYSTEM_ALERT_WINDOW` | Draw the optional floating bubble over other apps while Pip runs; tapping it opens Pip listening | No bubble; everything else works | When the owner turns the bubble on in Réglages (system "Display over other apps" screen) |
+
 ## Permission that protects a Pip component
 
 | Permission | Function | If refused | When asked |
@@ -75,7 +81,7 @@ Every component is `android:exported="false"` except these three:
 
 ## Not requested in v1
 
-Overlay (`SYSTEM_ALERT_WINDOW`), boot receiver (`RECEIVE_BOOT_COMPLETED`),
+Boot receiver (`RECEIVE_BOOT_COMPLETED`),
 background location, camera, package query (`QUERY_ALL_PACKAGES`), usage
 stats, secure settings (SPEC section 5).
 

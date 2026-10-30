@@ -232,4 +232,9 @@
     <string name="cap_notif_access">Notification access</string>
     <string name="cap_notif_access_gives">I read your notifications when you ask, never otherwise.</string>
     <string name="cap_notif_access_lost">I can\'t see your notifications; everything else works.</string>
+
+    <string name="bubble_section">Bubble</string>
+    <string name="bubble_toggle">Show Pip\'s bubble over other apps</string>
+    <string name="bubble_note">Tap the bubble to talk to me, drag it to move it. It\'s only there while I\'m on.</string>
+    <string name="bubble_desc">Pip — tap to talk to me</string>
 </resources>

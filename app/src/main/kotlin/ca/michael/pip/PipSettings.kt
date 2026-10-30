@@ -38,6 +38,11 @@ class PipSettings(context: Context) {
         get() = prefs.getBoolean("actions_enabled", true)
         set(v) = prefs.edit().putBoolean("actions_enabled", v).apply()
 
+    /** Block B (SPEC 15): the floating bubble, off by default (FR-B.1). */
+    var bubbleEnabled: Boolean
+        get() = prefs.getBoolean("bubble_enabled", false)
+        set(v) = prefs.edit().putBoolean("bubble_enabled", v).apply()
+
     /** When the current ACP pairing secret was created (key age on S5). 0 = not paired. */
     var acpPairedAtMs: Long
         get() = prefs.getLong("acp_paired_at", 0L)

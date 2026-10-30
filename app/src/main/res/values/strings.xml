@@ -245,4 +245,10 @@
     <string name="cap_notif_access">Accès aux notifications</string>
     <string name="cap_notif_access_gives">Je lis tes notifications quand tu me le demandes, jamais autrement.</string>
     <string name="cap_notif_access_lost">Je ne vois pas tes notifications ; le reste marche.</string>
+
+    <!-- Block B: bubble -->
+    <string name="bubble_section">Bulle</string>
+    <string name="bubble_toggle">Afficher la bulle de Pip par-dessus les autres apps</string>
+    <string name="bubble_note">Touche la bulle pour me parler, glisse-la pour la déplacer. Elle n\'est là que quand je suis allumé.</string>
+    <string name="bubble_desc">Pip — touche pour me parler</string>
 </resources>
