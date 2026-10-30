@@ -25,15 +25,24 @@ echo "ok   launched"
 
 # Push to talk: the assistant gesture arrives as ASSIST; Pip must turn itself on.
 adb shell am start -W -a android.intent.action.ASSIST -n "$pkg/ca.michael.pip.ui.MainActivity" >/dev/null
-for i in $(seq 1 15); do
-  if adb shell dumpsys activity services "$pkg" | grep -q "PipService"; then break; fi
+# Full dump (-a): the short one omits isForeground. Poll, since the service is
+# listed before it calls startForeground. Output is captured first so grep -q
+# cannot SIGPIPE adb under pipefail.
+dump=""
+for i in $(seq 1 20); do
+  dump="$(adb shell dumpsys activity -a services "$pkg")"
+  if grep -q "isForeground=true" <<<"$dump"; then break; fi
   sleep 1
 done
-adb shell dumpsys activity services "$pkg" | grep -q "PipService" || fail "PipService not running after ASSIST"
-adb shell dumpsys activity services "$pkg" | grep -q "isForeground=true" || fail "PipService is not in the foreground"
+grep -q "PipService" <<<"$dump" || fail "PipService not running after ASSIST"
+if ! grep -q "isForeground=true" <<<"$dump"; then
+  grep -iE "ServiceRecord|isForeground|foreground" <<<"$dump" || true
+  fail "PipService is not in the foreground"
+fi
 echo "ok   ASSIST turned Pip on (foreground service running)"
 
-adb shell dumpsys notification --noredact | grep -q "pip_status" || fail "S1 notification (channel pip_status) not posted"
+notif="$(adb shell dumpsys notification --noredact)"
+grep -q "pip_status" <<<"$notif" || fail "S1 notification (channel pip_status) not posted"
 echo "ok   S1 notification posted"
 
 sleep 3
