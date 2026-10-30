@@ -60,55 +60,59 @@ Cases the tests do not exercise, to check on the device:
 
 Two Sonnet agents, read-only, in parallel. One reviews actions and the home
 flow; the other reviews the service, bubble, listener and manifest.
-- [ ] Collect the findings.
-- [ ] Verify each finding against the code.
-- [ ] Fix the confirmed ones (Task 5).
+Result: 13 findings; 12 confirmed and fixed in `0f47543` and `c429835`. One
+was dropped: the notebook is cached after its first read, so the 30 s
+reminder check does no repeated disk work.
+- [x] Collect the findings.
+- [x] Verify each finding against the code.
+- [x] Fix the confirmed ones (Task 5).
 
 ## Task 2 — Push to talk (approved design)
 
-- [ ] `MainActivity` handles `android.intent.action.ASSIST`.
+- [x] `MainActivity` handles `android.intent.action.ASSIST`.
   - Pip turns on if it is off (my call 1), then listens.
-- [ ] S1 gets a « Parler » action opening `MainActivity` with `EXTRA_TALK`.
-- [ ] S4 gets a « Faire de Pip l'assistant » button. It opens
+- [x] S1 gets a « Parler » action opening `MainActivity` with `EXTRA_TALK`.
+- [x] S4 gets a « Faire de Pip l'assistant » button. It opens
   `Settings.ACTION_VOICE_INPUT_SETTINGS`, with fallback
   `ACTION_MANAGE_DEFAULT_APPS_SETTINGS`.
-- [ ] Update `SPEC.md` (new §16), strings (FR + EN) and `BRAND.md` lines.
+- [x] Update `SPEC.md` (new §16), strings (FR + EN) and `BRAND.md` lines.
 
 ## Task 3 — « Regarde l'écran » from the bubble (closes Q-5)
 
 The problem: when Pip fills the screen, there is no other app to read
 (README "Open points"). The bubble sits over the other app.
-- [ ] A **long press** on the bubble is an explicit owner request (FR-3.1).
+- [x] A **long press** on the bubble is an explicit owner request (FR-3.1).
   - It captures the current app through the accessibility service.
   - Pip's own windows stay excluded: the bubble is an overlay, not an
     application window.
   - Pip then opens listening, with that snapshot attached to the next turn
     and shown under « Voir ce que j'ai lu ».
-- [ ] If accessibility is off, it opens Pip with the existing hint, and
+- [x] If accessibility is off, it opens Pip with the existing hint, and
   nothing is read.
-- [ ] Update `SPEC.md` (FR-3.1 and §15 FR-B.4), then mark Q-5 resolved by
+- [x] Update `SPEC.md` (FR-3.1 and §15 FR-B.4), then mark Q-5 resolved by
   this gesture.
 
 ## Task 4 — Fun pack (Pip's personality, no new permission)
 
-- [ ] **Time-of-day greeting** on S2, in Pip's voice: morning, afternoon,
+- [x] **Time-of-day greeting** on S2, in Pip's voice: morning, afternoon,
   evening, night.
-- [ ] **Tap Pip's face:** a wink, plus a short random line from a small
+- [x] **Tap Pip's face:** a wink, plus a short random line from a small
   original set.
-- [ ] **Suggestion chips** on S2 that fill and send a turn:
+- [x] **Suggestion chips** on S2 that fill and send a turn:
   - « Qu'est-ce que j'ai demain ? »
   - « Résume mes notifications »
   - « Regarde mon écran »
   - « Ajoute une note »
 
   Each chip only starts a normal turn. Actions still go through S10.
-- [ ] **Success wink:** the face shows SUCCESS for 2 s after an approved
+- [x] **Success wink:** the face shows SUCCESS for 2 s after an approved
   action ran.
-- [ ] Strings FR + EN, and a `BRAND.md` section for these lines.
+- [x] Strings FR + EN, and a `BRAND.md` section for these lines.
 
 ## Task 5 — Fix confirmed review findings
 
-- [ ] One commit per finding or small group, each with its reason.
+- [x] The fixes are grouped in `0f47543` (app) and `c429835` (core,
+  test-first), with the reason for each in the commit message.
 
 ## Task 6 — Ship
 
