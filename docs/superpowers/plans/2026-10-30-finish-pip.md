@@ -174,9 +174,24 @@ the reference, but CI should catch crashes first.
   - Stop worked on attempt 1; `SMOKE PASS`.
 - [x] Merge PR #8 after CI is green on its head.
 
-Still owner-only, on the phone: bubble gestures over another app, the
+Still owner-only, on the phone: drag and long press on the bubble, the
 assistant gesture on the owner's phone model, the S10 approval card with a
 live brain (approve / refuse / 1 s arming).
+
+## Task 9 — Bubble on the emulator (after the goal check)
+
+- [x] The smoke test checks the bubble (SPEC 15):
+  - overlay permission pre-granted with `appops`;
+  - Pip on, then « Afficher la bulle » ticked in Réglages;
+  - from the launcher, Pip's `APPLICATION_OVERLAY` window is shown;
+  - a tap on it makes `MainActivity` the resumed activity.
+- [x] The first run showed the bubble, then the script exited silently.
+  Cause: `dumpsys | grep -m1` inside a command substitution, under
+  `set -e` and `pipefail`. Fixed in `11c53f8`.
+- [x] CI green on `11c53f8` (runs 41002717640 / 41002714155):
+  `ok bubble shown over another app (at 28 292)`,
+  `ok tap on the bubble opened Pip`, `SMOKE PASS`.
+- [ ] Merge PR #9 after CI is green on its head.
 
 ## Out of scope (stated, not built)
 
