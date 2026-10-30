@@ -116,9 +116,16 @@ The problem: when Pip fills the screen, there is no other app to read
 
 ## Task 6 — Ship
 
-- [ ] Gates: `clean-room-gate.sh`, `check-permissions.sh`, `:core:test`.
-- [ ] Commit and push, open a draft PR, watch CI until green, merge.
-- [ ] Give the owner the APK link and sha256, and a short device test list.
+- [x] Gates: `clean-room-gate.sh` exit 0, `check-permissions.sh` exit 0,
+  `:core:test` 48/48 (local). In CI: all steps of runs 34 and 36 green, with
+  gitleaks.
+- [x] Committed (`c429835`, `0f47543`, `4f9d434`), PR #6 opened, CI green
+  on the code head (run 34, `0f47543`) and on `4f9d434` (runs 36/37).
+  Merge happens after CI is green on this commit.
+- [x] APK (run 36, `4f9d434`): 4 685 247 bytes, sha256
+  `f80f2769c3e26292666c364f9ca9223d790f793e3e855922507e3120cb47a272`,
+  artifact `pip-debug-apk`
+  <https://github.com/mboyer1269-pixel/pip/actions/runs/40984343136/artifacts/12946248137>.
 
 ## Out of scope (stated, not built)
 
