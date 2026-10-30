@@ -12,6 +12,9 @@ import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import ca.michael.pip.PipSettings
 import ca.michael.pip.R
+import ca.michael.pip.core.text.SpeechText
+import ca.michael.pip.core.text.VoiceOption
+import ca.michael.pip.core.text.VoicePick
 import java.util.Locale
 
 /**
@@ -89,7 +92,7 @@ class VoiceController(private val context: Context, private val settings: PipSet
             listener.onSpeakingDone()
             return
         }
-        tts.language = if (english) Locale.CANADA else Locale.CANADA_FRENCH
+        useBestVoice(if (english) Locale.CANADA else Locale.CANADA_FRENCH)
         tts.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
             override fun onStart(utteranceId: String?) { main.post { listener.onSpeaking() } }
             override fun onDone(utteranceId: String?) { main.post { listener.onSpeakingDone() } }
@@ -97,7 +100,28 @@ class VoiceController(private val context: Context, private val settings: PipSet
             override fun onError(utteranceId: String?) { main.post { listener.onSpeakingDone() } }
             override fun onStop(utteranceId: String?, interrupted: Boolean) { main.post { listener.onSpeakingDone() } }
         })
-        tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "pip-answer")
+        tts.speak(SpeechText.clean(text, english), TextToSpeech.QUEUE_FLUSH, null, "pip-answer")
+    }
+
+    /**
+     * The engine's default voice for a locale is often its plainest one. Pick the
+     * best installed voice for the region (or the language) instead; keep the
+     * default when the engine lists none.
+     */
+    private fun useBestVoice(locale: Locale) {
+        val voices = try { tts.voices.orEmpty() } catch (e: RuntimeException) { emptySet() }
+        val options = voices.map {
+            VoiceOption(
+                name = it.name,
+                localeTag = it.locale.toLanguageTag(),
+                quality = it.quality,
+                needsNetwork = it.isNetworkConnectionRequired,
+                installed = TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED !in it.features.orEmpty(),
+            )
+        }
+        val pick = VoicePick.best(options, locale.toLanguageTag())
+        val voice = pick?.let { p -> voices.firstOrNull { it.name == p.name } }
+        if (voice == null || tts.setVoice(voice) != TextToSpeech.SUCCESS) tts.language = locale
     }
 
     fun stopSpeaking() {

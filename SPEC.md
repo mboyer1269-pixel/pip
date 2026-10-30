@@ -451,7 +451,7 @@ Pip can now act on the owner's phone, always with the owner's yes.
 | `read_sms` | Read recent received SMS and send them to the brain | `from` (optional), `limit` (1–10, default 5) |
 | `read_call_log` | Read recent calls and send them to the brain | `limit` (1–10, default 5) |
 | `read_calendar` | Read events in a date range and send them to the brain | `from_date` (YYYY-MM-DD, default today), `days` (1–14, default 1) |
-| `add_calendar_event` | Add an event to the primary calendar | `title`, `start` (YYYY-MM-DDTHH:MM, local), `duration_minutes` (5–1440, default 60), `location` (optional) |
+| `add_calendar_event` | Add an event to the primary calendar, with an alert at its start time | `title`, `start` (YYYY-MM-DDTHH:MM, local), `duration_minutes` (5–1440, default 60), `location` (optional) |
 | `get_location` | Read the current position and send it to the brain | none |
 | `get_steps` | Read the step counter (steps since the last reboot) and send it to the brain | none |
 
