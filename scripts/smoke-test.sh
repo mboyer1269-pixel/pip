@@ -14,7 +14,8 @@ pkg="ca.michael.pip.debug"
 fail() { echo "SMOKE FAIL: $*"; adb logcat -b crash -d || true; exit 1; }
 
 # UI helpers (uiautomator). find_text prints the centre "x y" of the first node
-# whose text matches $1 (case-insensitive, exact), or nothing.
+# whose text or content-desc matches $1 (case-insensitive, exact), or nothing.
+# ui_labels lists every visible label, for failure reports.
 ui_dump() { adb shell uiautomator dump /sdcard/pip-ui.xml >/dev/null 2>&1 || true; adb shell cat /sdcard/pip-ui.xml 2>/dev/null || true; }
 find_text() {
   ui_dump | python3 -c '
@@ -23,10 +24,20 @@ want = sys.argv[1].casefold()
 try: root = ET.fromstring(sys.stdin.read())
 except ET.ParseError: sys.exit(0)
 for n in root.iter("node"):
-    if n.get("text", "").strip().casefold() == want:
+    labels = {n.get("text", "").strip().casefold(), n.get("content-desc", "").strip().casefold()}
+    if want in labels:
         x1, y1, x2, y2 = map(int, re.findall(r"\d+", n.get("bounds")))
         print((x1 + x2) // 2, (y1 + y2) // 2); break
 ' "$1"
+}
+ui_labels() {
+  ui_dump | python3 -c '
+import sys, xml.etree.ElementTree as ET
+try: root = ET.fromstring(sys.stdin.read())
+except ET.ParseError: print("(no UI dump)"); sys.exit(0)
+seen = [l for n in root.iter("node") for l in (n.get("text", ""), n.get("content-desc", "")) if l.strip()]
+print("visible: " + " | ".join(seen))
+'
 }
 wait_text() { for i in $(seq 1 15); do xy="$(find_text "$1")"; [ -n "$xy" ] && return 0; sleep 1; done; return 1; }
 
@@ -70,10 +81,14 @@ echo "ok   S1 notification posted"
 adb shell cmd statusbar expand-notifications
 if ! wait_text "Arrêter"; then
   title="$(find_text "Pip (debug)")"
-  [ -n "$title" ] || fail "S1 not visible in the shade"
+  [ -n "$title" ] || { ui_labels; fail "S1 not visible in the shade"; }
   set -- $title
   adb shell input swipe "$1" "$2" "$1" "$(( $2 + 400 ))" 300
-  wait_text "Arrêter" || fail "S1 Stop action (Arrêter) not visible in the shade"
+  if ! wait_text "Arrêter"; then
+    exp="$(find_text "Expand")"
+    [ -n "$exp" ] && adb shell input tap $exp
+    wait_text "Arrêter" || { ui_labels; fail "S1 Stop action (Arrêter) not visible in the shade"; }
+  fi
 fi
 adb shell input tap $xy
 adb shell cmd statusbar collapse
@@ -86,14 +101,14 @@ grep -q "PipService" <<<"$dump" && fail "PipService still running after Stop"
 echo "ok   Stop on S1 stopped Pip"
 
 adb shell am start -W -n "$pkg/ca.michael.pip.ui.MainActivity" >/dev/null
-wait_text "Allumer Pip" || fail "home does not offer « Allumer Pip » after Stop"
+wait_text "Allumer Pip" || { ui_labels; false; } || fail "home does not offer « Allumer Pip » after Stop"
 echo "ok   home shows « Allumer Pip » (FR)"
 
 # English strings (values-en) load when the app locale is English.
 adb shell cmd locale set-app-locales "$pkg" --locales en-US >/dev/null
 adb shell am force-stop "$pkg"
 adb shell am start -W -n "$pkg/ca.michael.pip.ui.MainActivity" >/dev/null
-wait_text "Turn Pip on" || fail "English home string (Turn Pip on) not shown"
+wait_text "Turn Pip on" || { ui_labels; false; } || fail "English home string (Turn Pip on) not shown"
 echo "ok   home shows \"Turn Pip on\" (EN)"
 
 sleep 3
