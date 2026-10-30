@@ -43,7 +43,7 @@ print("visible: " + " | ".join(seen))
 }
 # scroll_to_text: wait_text, swiping up between tries (long screens).
 scroll_to_text() {
-  size="$(adb shell wm size | grep -oE '[0-9]+x[0-9]+' | tail -n 1)"
+  size="$(adb shell wm size | grep -oE '[0-9]+x[0-9]+' | tail -n 1 || true)"; [ -n "$size" ] || size=1080x1920
   w="${size%x*}"; h="${size#*x}"
   for i in 1 2 3 4 5 6; do
     xy="$(find_text "$1")"; [ -n "$xy" ] && return 0
@@ -167,7 +167,8 @@ echo "ok   bubble shown over another app (at $bubble_xy)"
 adb shell input tap $bubble_xy
 top=""
 for i in $(seq 1 10); do
-  top="$(adb shell dumpsys activity activities | grep -m1 -E "topResumedActivity|mResumedActivity" | tr -d "\r")"
+  acts="$(adb shell dumpsys activity activities)"
+  top="$(grep -E "topResumedActivity|mResumedActivity" <<<"$acts" | head -n 1 | tr -d "\r" || true)"
   grep -q "$pkg/ca.michael.pip.ui.MainActivity" <<<"$top" && break
   sleep 1
 done
