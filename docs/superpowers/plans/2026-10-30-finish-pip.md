@@ -211,6 +211,30 @@ own phone model. Task 10 moved the rest to the emulator.
   - `ok assistant key (Pip as assistant) turned Pip on`
   - `SMOKE PASS`
 
+## Task 11 — Owner phone test 1 feedback
+
+The owner ran test 1 on the phone. The approval card worked and the event
+was added to the calendar. Three problems came back:
+- no alert fired at the event's time;
+- the voice sounded robotic;
+- the design looked plain.
+
+- [x] Calendar alert. Cause: `add_calendar_event` inserted the event
+  without a `CalendarContract.Reminders` row, so the calendar never alerted.
+  Fix: insert an alert row at the start time (minutes 0, `METHOD_ALERT`),
+  and report to the brain when the calendar refuses the alert.
+- [x] Voice.
+  - Pip only set `tts.language`, which gives the engine's default voice.
+    It now picks the best installed voice for the region, then for the
+    language, by highest quality, preferring offline voices on ties
+    (`VoicePick`).
+  - Answers are cleaned before they are spoken: Markdown marks, headings,
+    bullets, link targets, bare URLs and emojis are removed
+    (`SpeechText`).
+  - Test-first: 8 new tests in `SpeechTest`, seen failing to compile and
+    then passing; `:core:test` is 56/56.
+- [ ] Design polish: needs the owner's choice of direction (see `BRAND.md`).
+
 ## Out of scope (stated, not built)
 
 - Wake word: the owner chose push-to-talk.

@@ -329,8 +329,16 @@ class DeviceActionRunner(private val activity: Activity) {
             put(CalendarContract.Events.EVENT_TIMEZONE, zone.id)
             a.location?.let { put(CalendarContract.Events.EVENT_LOCATION, it) }
         }
-        activity.contentResolver.insert(CalendarContract.Events.CONTENT_URI, values) ?: return "failed: calendar refused the event"
-        return "event added: ${a.title} at ${a.start}"
+        val event = activity.contentResolver.insert(CalendarContract.Events.CONTENT_URI, values)
+            ?: return "failed: calendar refused the event"
+        // Without a reminder row the calendar never alerts: ring at the event's start.
+        val alert = ContentValues().apply {
+            put(CalendarContract.Reminders.EVENT_ID, ContentUris.parseId(event))
+            put(CalendarContract.Reminders.MINUTES, 0)
+            put(CalendarContract.Reminders.METHOD, CalendarContract.Reminders.METHOD_ALERT)
+        }
+        val alerted = activity.contentResolver.insert(CalendarContract.Reminders.CONTENT_URI, alert) != null
+        return "event added: ${a.title} at ${a.start}" + if (alerted) " (alert at start)" else " (no alert: the calendar refused it)"
     }
 
     @SuppressLint("MissingPermission")
