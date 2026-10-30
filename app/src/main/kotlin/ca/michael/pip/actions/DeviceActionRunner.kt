@@ -110,7 +110,7 @@ class DeviceActionRunner(private val activity: Activity) {
             ?: noContact(action.to)
         is DeviceAction.FindContact -> Prepared.Ready(action, s(R.string.act_find_contact, action.query))
         is DeviceAction.ReadSms -> Prepared.Ready(action,
-            if (action.from == null) s(R.string.act_read_sms, action.limit) else s(R.string.act_read_sms_from, action.limit, action.from))
+            action.from?.let { s(R.string.act_read_sms_from, action.limit, it) } ?: s(R.string.act_read_sms, action.limit))
         is DeviceAction.ReadCallLog -> Prepared.Ready(action, s(R.string.act_read_calls, action.limit))
         is DeviceAction.ReadCalendar -> Prepared.Ready(action,
             s(R.string.act_read_calendar, (action.fromDate ?: LocalDate.now()).toString(), action.days))
