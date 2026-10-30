@@ -227,6 +227,28 @@ Pip's own descriptions per intent (section 7.5):
 | Buttons | Envoyer cette fois · Ne pas envoyer | Send this once · Don't send |
 | After refusal | D'accord, je réponds sans. | Okay, I'll answer without it. |
 
+### S10 — Action approval (Block A)
+
+Title: the S7 line « Pip attend ton oui — sans lui, rien ne bouge. » /
+"Pip is waiting for your yes — nothing moves without it." Buttons
+**Approuver** / **Refuser**, Approve armed after one second.
+
+| Action | FR | EN |
+|---|---|---|
+| `open_app` | J'ouvre l'app « {nom} ». | I'll open the app "{name}". |
+| `call` | Je vais appeler : {nom (numéro)} | I'll call: {name (number)} |
+| `send_sms` | Je vais envoyer ce texto : « {texte} » À : {nom (numéro)} | I'll send this text: "{text}" To: {name (number)} |
+| `find_contact` | Je cherche « {nom} » dans tes contacts et j'envoie les noms et numéros trouvés à mon cerveau. | I'll look up "{name}" in your contacts and send the names and numbers I find to my brain. |
+| `read_sms` | Je lis tes {n} derniers textos reçus et je les envoie à mon cerveau. | I'll read your last {n} received texts and send them to my brain. |
+| `read_call_log` | Je lis tes {n} derniers appels et je les envoie à mon cerveau. | I'll read your last {n} calls and send them to my brain. |
+| `read_calendar` | Je lis ton calendrier à partir du {date} ({n} jour(s)) et j'envoie les événements à mon cerveau. | I'll read your calendar from {date} ({n} day(s)) and send the events to my brain. |
+| `add_calendar_event` | J'ajoute à ton calendrier : « {titre} », {date}, pour {n} minutes. | I'll add to your calendar: "{title}", {date}, for {n} minutes. |
+| `get_location` | Je lis ta position actuelle et je l'envoie à mon cerveau. | I'll read your current position and send it to my brain. |
+| `get_steps` | Je lis ton compteur de pas (depuis le dernier redémarrage du téléphone) et je l'envoie à mon cerveau. | I'll read your step counter (since the phone last restarted) and send it to my brain. |
+| Several contacts | Plusieurs contacts correspondent. Choisis le bon : | Several contacts match. Pick the right one: |
+| Read actions | Ce que je lis part à mon cerveau pour cette réponse seulement. Si tu refuses, rien ne part. | What I read goes to my brain for this answer only. If you refuse, nothing leaves. |
+| Permission refused | Sans cette permission, je ne peux pas le faire. Rien n'a été fait. | Without that permission I can't do it. Nothing was done. |
+
 ## 5. Visual identity — direction A+B "Le pépin dans la poche"
 
 ### 5.1 Mark

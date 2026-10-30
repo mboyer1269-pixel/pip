@@ -56,6 +56,12 @@ class BrainSettingsActivity : Activity() {
 
         col.addView(Ui.spacer(this, 20))
         col.addView(Ui.text(this, getString(R.string.voice_section), 18f, bold = true))
+        // FR-A.9: the owner can turn device actions off.
+        col.addView(CheckBox(this).apply {
+            setText(R.string.actions_toggle)
+            isChecked = s.actionsEnabled
+            setOnCheckedChangeListener { _, on -> s.actionsEnabled = on }
+        })
         col.addView(CheckBox(this).apply {
             setText(R.string.speak_answers)
             isChecked = s.speakAnswers
@@ -105,7 +111,7 @@ class BrainSettingsActivity : Activity() {
         feedback.setText(R.string.state_thinking)
         pip.testBrain { result ->
             feedback.text = when (result) {
-                is BrainResult.Answer -> getString(R.string.test_ok)
+                is BrainResult.Answer, is BrainResult.ActionRequest -> getString(R.string.test_ok)
                 BrainResult.NoKey -> getString(R.string.err_no_key)
                 BrainResult.NotConfigured -> getString(R.string.err_not_configured)
                 BrainResult.NoNetwork -> getString(R.string.err_no_network)

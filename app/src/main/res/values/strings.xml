@@ -214,4 +214,26 @@
     <!-- Accessibility service -->
     <string name="a11y_label">Pip — lecture d\'écran</string>
     <string name="a11y_description">Pip lit le contenu de l\'écran seulement quand tu le lui demandes, pour un tour. Pip ne touche à rien : pas de clic, pas de saisie, pas de capture d\'image. Les champs de mot de passe sont ignorés.</string>
+
+    <!-- S10 — Action approval (Block A) -->
+    <string name="act_open_app">J\'ouvre l\'app « %1$s ».</string>
+    <string name="act_call">Je vais appeler :</string>
+    <string name="act_sms">Je vais envoyer ce texto :\n« %1$s »\nÀ :</string>
+    <string name="act_find_contact">Je cherche « %1$s » dans tes contacts et j\'envoie les noms et numéros trouvés à mon cerveau.</string>
+    <string name="act_read_sms">Je lis tes %1$d derniers textos reçus et je les envoie à mon cerveau.</string>
+    <string name="act_read_sms_from">Je lis les %1$d derniers textos reçus de « %2$s » et je les envoie à mon cerveau.</string>
+    <string name="act_read_calls">Je lis tes %1$d derniers appels et je les envoie à mon cerveau.</string>
+    <string name="act_read_calendar">Je lis ton calendrier à partir du %1$s (%2$d jour(s)) et j\'envoie les événements à mon cerveau.</string>
+    <string name="act_add_event">J\'ajoute à ton calendrier : « %1$s », %2$s, pour %3$d minutes.</string>
+    <string name="act_event_place">Lieu : %1$s</string>
+    <string name="act_location">Je lis ta position actuelle et je l\'envoie à mon cerveau.</string>
+    <string name="act_steps">Je lis ton compteur de pas (depuis le dernier redémarrage du téléphone) et je l\'envoie à mon cerveau.</string>
+    <string name="act_choose_contact">Plusieurs contacts correspondent. Choisis le bon :</string>
+    <string name="act_sends_data">Ce que je lis part à mon cerveau pour cette réponse seulement. Si tu refuses, rien ne part.</string>
+    <string name="act_no_contact">Je ne trouve aucun contact nommé « %1$s ».</string>
+    <string name="act_no_app">Je ne trouve aucune app nommée « %1$s ».</string>
+    <string name="act_permission_refused">Sans cette permission, je ne peux pas le faire. Rien n\'a été fait.</string>
+    <string name="act_failed">Ça n\'a pas marché de mon côté. Rien n\'a été fait.</string>
+    <string name="act_round_limit">Je m\'arrête là pour ce tour. Redemande-moi si tu veux continuer.</string>
+    <string name="actions_toggle">Laisser Pip proposer des actions sur le téléphone (toujours avec ton oui)</string>
 </resources>

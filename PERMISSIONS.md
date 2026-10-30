@@ -17,6 +17,31 @@ Permissions are checked **at the moment of use**, never all at startup.
 | `android.permission.FOREGROUND_SERVICE_SPECIAL_USE` | The foreground-service type permission matching the type chosen in FR-1.5 (`specialUse`, see README) | Granted at install | Never (install-time permission) |
 | `android.permission.RECORD_AUDIO` | Speech recognition while the owner holds the conversation open with Talk (FR-2.1). Pip never records or stores audio (FR-2.3) | Typing only (FR-2.5) | When the owner first taps "Parler" on S2, or "Autoriser" on S3 |
 
+## Block A permissions (SPEC 13)
+
+Each is asked only when an action the owner just **approved** on S10 first
+needs it (FR-A.7). Refusing one makes that action report "permission
+refused"; nothing else changes. `READ_CONTACTS` may be asked just before
+S10 when the brain names a person, so the card can show the exact name and
+number; the lookup stays on the device (FR-A.5).
+
+| Permission | Function | If refused | When asked |
+|---|---|---|---|
+| `android.permission.CALL_PHONE` | `call`: place the approved call | Pip cannot call | First approved `call` |
+| `android.permission.SEND_SMS` | `send_sms`: send the approved text | Pip cannot text | First approved `send_sms` |
+| `android.permission.READ_SMS` | `read_sms`: read recent received texts | Pip cannot read texts | First approved `read_sms` |
+| `android.permission.READ_CALL_LOG` | `read_call_log`: read recent calls | Pip cannot read the call log | First approved `read_call_log` |
+| `android.permission.READ_CONTACTS` | `find_contact`; turning a name into a number for `call` / `send_sms` / `read_sms` | Only numbers work, not names | When a name must be resolved, or first approved `find_contact` |
+| `android.permission.READ_CALENDAR` | `read_calendar`; finding the calendar for `add_calendar_event` | No calendar actions | First approved calendar action |
+| `android.permission.WRITE_CALENDAR` | `add_calendar_event`: insert the approved event | Pip cannot add events | First approved `add_calendar_event` |
+| `android.permission.ACCESS_COARSE_LOCATION` | `get_location`, approximate position | No position | First approved `get_location` |
+| `android.permission.ACCESS_FINE_LOCATION` | `get_location`, precise position (optional: approximate is accepted) | Approximate position only | Asked together with coarse; the owner may pick approximate |
+| `android.permission.ACTIVITY_RECOGNITION` | `get_steps`: read the step counter | No step count | First approved `get_steps` |
+
+Location is read only while Pip is on screen, never in the background
+(no `ACCESS_BACKGROUND_LOCATION`). `uses-feature` entries for telephony,
+location and the step counter are marked `required="false"`.
+
 ## Permission that protects a Pip component
 
 | Permission | Function | If refused | When asked |
@@ -31,6 +56,8 @@ engines it uses, and nothing else (no package listing, no
 
 - `android.speech.RecognitionService` — find a speech recognizer (FR-2.2).
 - `android.intent.action.TTS_SERVICE` — find a text-to-speech engine (FR-2.4).
+- `android.intent.action.MAIN` + `android.intent.category.LAUNCHER` — find
+  apps the owner can open with `open_app` (SPEC 13.2).
 
 ## Exported components (SEC-4 exceptions)
 
@@ -44,8 +71,8 @@ Every component is `android:exported="false"` except:
 ## Not requested in v1
 
 Overlay (`SYSTEM_ALERT_WINDOW`), boot receiver (`RECEIVE_BOOT_COMPLETED`),
-SMS, phone, call log, contacts, calendar, location, camera, package query
-(`QUERY_ALL_PACKAGES`), usage stats, secure settings (SPEC section 5).
+background location, camera, package query (`QUERY_ALL_PACKAGES`), usage
+stats, secure settings (SPEC section 5).
 
 ## Merged manifest
 

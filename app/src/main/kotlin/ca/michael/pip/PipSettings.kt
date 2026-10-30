@@ -33,6 +33,11 @@ class PipSettings(context: Context) {
         get() = prefs.getBoolean("speak_answers", true)
         set(v) = prefs.edit().putBoolean("speak_answers", v).apply()
 
+    /** Block A (SPEC 13): the brain may propose device actions, each approved on S10. */
+    var actionsEnabled: Boolean
+        get() = prefs.getBoolean("actions_enabled", true)
+        set(v) = prefs.edit().putBoolean("actions_enabled", v).apply()
+
     /** When the current ACP pairing secret was created (key age on S5). 0 = not paired. */
     var acpPairedAtMs: Long
         get() = prefs.getLong("acp_paired_at", 0L)

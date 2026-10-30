@@ -203,4 +203,25 @@
 
     <string name="a11y_label">Pip — screen reading</string>
     <string name="a11y_description">Pip reads what is on screen only when you ask, for one turn. Pip touches nothing: no taps, no typing, no image capture. Password fields are skipped.</string>
+
+    <string name="act_open_app">I\'ll open the app \"%1$s\".</string>
+    <string name="act_call">I\'ll call:</string>
+    <string name="act_sms">I\'ll send this text:\n\"%1$s\"\nTo:</string>
+    <string name="act_find_contact">I\'ll look up \"%1$s\" in your contacts and send the names and numbers I find to my brain.</string>
+    <string name="act_read_sms">I\'ll read your last %1$d received texts and send them to my brain.</string>
+    <string name="act_read_sms_from">I\'ll read the last %1$d texts received from \"%2$s\" and send them to my brain.</string>
+    <string name="act_read_calls">I\'ll read your last %1$d calls and send them to my brain.</string>
+    <string name="act_read_calendar">I\'ll read your calendar from %1$s (%2$d day(s)) and send the events to my brain.</string>
+    <string name="act_add_event">I\'ll add to your calendar: \"%1$s\", %2$s, for %3$d minutes.</string>
+    <string name="act_event_place">Place: %1$s</string>
+    <string name="act_location">I\'ll read your current position and send it to my brain.</string>
+    <string name="act_steps">I\'ll read your step counter (since the phone last restarted) and send it to my brain.</string>
+    <string name="act_choose_contact">Several contacts match. Pick the right one:</string>
+    <string name="act_sends_data">What I read goes to my brain for this answer only. If you refuse, nothing leaves.</string>
+    <string name="act_no_contact">I can\'t find any contact named \"%1$s\".</string>
+    <string name="act_no_app">I can\'t find any app named \"%1$s\".</string>
+    <string name="act_permission_refused">Without that permission I can\'t do it. Nothing was done.</string>
+    <string name="act_failed">That didn\'t work on my side. Nothing was done.</string>
+    <string name="act_round_limit">I\'ll stop there for this turn. Ask me again if you want to keep going.</string>
+    <string name="actions_toggle">Let Pip propose actions on the phone (always with your yes)</string>
 </resources>

@@ -49,13 +49,15 @@ cloche ? Il te le dit franchement : c'est juste un *petit pépin*.
 | 🧠 | Cerveau au choix | N'importe quel point d'accès compatible OpenAI, en `https://`, avec **ta** clé — scellée par le Keystore |
 | 📓 | Carnet | Notes, promesses, rappels — chiffré AES-GCM, consultable et effaçable par toi |
 | 📡 | Tâches à distance (ACP) | Connexion **sortante** `wss://` vers ton orchestrateur, enveloppes signées, quatre intentions seulement |
-| 🛡️ | Permissions | Six demandées, plus la protection du service d'accessibilité — pas une de plus, chacune justifiée dans [`PERMISSIONS.md`](PERMISSIONS.md) |
+| 📱 | **Actions sur le téléphone** (bloc A) | Appeler, texter, lire tes textos, appels, contacts, calendrier, position, pas ; ouvrir une app ; ajouter un événement — le cerveau propose, **tu approuves chaque action** |
+| 🛡️ | Permissions | Chacune demandée au moment où une action approuvée en a besoin, et justifiée dans [`PERMISSIONS.md`](PERMISSIONS.md) |
 
 ## 🚫 Ce que Pip ne fera jamais
 
 - Ouvrir un port pour écouter le réseau.
 - Toucher, taper ou glisser dans une autre application (v1 : lecture seule).
-- Envoyer un SMS, passer un appel, lire tes contacts ou ta position.
+- Appeler, texter ou lire tes données **sans ton oui**, action par action.
+- Laisser une tâche à distance (ACP) envoyer un SMS ou passer un appel.
 - Exécuter une commande, ouvrir une URL ou un `Intent` libres venus de l'extérieur.
 - Tourner sans que sa notification soit affichée.
 - Te demander un « oui pour toujours ».
@@ -164,6 +166,7 @@ distribution, no release signing.
 | `core/.../notebook/ExcerptPicker.kt` | Proposes a notebook excerpt for S9 approval (FR-5.5) |
 | `core/.../brain/Brain.kt` | Brain client, honest error kinds, Pip's fixed instructions, turn builder (V1-4) |
 | `core/.../brain/UrlConnectionTransport.kt` | Platform HTTPS transport for the brain |
+| `core/.../actions/Actions.kt` | Block A closed action list, argument checks, tool definitions (SPEC 13) |
 | `core/.../text/TextMatch.kt` | Local phrase matching: spoken screen request, language guess |
 | `app/.../PipApp.kt`, `PipRuntime.kt` | Process-wide owner of Pip's parts; Stop sequence (FR-1.3) |
 | `app/.../PipState.kt` | State shown on S1/S2 |
@@ -178,6 +181,7 @@ distribution, no release signing.
 | `app/.../voice/VoiceController.kt` | Speech recognition and TTS (V1-2) |
 | `app/.../screen/PipAccessibilityService.kt` | Read-only screen capture on request (V1-3) |
 | `app/.../acp/AcpConnection.kt` | Outbound WebSocket, verify-then-broker (V1-6) |
+| `app/.../actions/DeviceActionRunner.kt` | Block A: prepares each S10 card (local contact lookup) and runs approved actions |
 | `app/.../acp/DeviceTaskExecutor.kt` | Runs the four approved intents |
 | `app/.../ui/MainActivity.kt` | S2 Home and S9 excerpt approval |
 | `app/.../ui/SetupActivity.kt` | S3 Setup & permissions |
@@ -236,6 +240,7 @@ time limit on Android 15.
 | `system_asr_opt_in` | plain prefs | `false` |
 | `speech_language` | plain prefs | `fr-CA` |
 | `speak_answers` | plain prefs | `true` |
+| `actions_enabled` | plain prefs | `true` (Block A; every action still needs approval on S10) |
 
 The brain endpoint is `<brain_base_url>/chat/completions` (for example a base
 URL ending in `/v1`).
