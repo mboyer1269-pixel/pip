@@ -371,6 +371,12 @@ sending SMS or placing calls.
 `system_asr_opt_in`, `speech_language`, `speak_answers`, `actions_enabled`, `bubble_enabled`. No default values
 are inherited from anywhere; Phase B sets them and lists them in the README.
 
+**App language.** Pip declares the languages it ships (French, English), so
+the owner can pick Pip's language in Android's own per-app language screen
+(Android 13+). It is not a Pip setting; it follows the device by default.
+Any French locale gets French, even when English is also in the device's
+list; a language Pip does not ship falls back to English.
+
 ## 10. Acceptance tests (minimum for Phases 5–7)
 
 | ID | Test |
@@ -568,9 +574,9 @@ Design: `docs/superpowers/specs/2026-10-30-push-to-talk-design.md`.
 
 | ID | Question | Status |
 |---|---|---|
-| Q-1 | Orchestrator hostname for the build allowlist (ACP-3) | **Open** — needed by Phase 6; until answered the allowlist is empty and the ACP client refuses to connect |
+| Q-1 | Orchestrator hostname for the build allowlist (ACP-3) | **Deferred by the owner (2026-10-30):** no server yet. The allowlist stays empty and the ACP client refuses to connect; reopen when the owner gives a hostname |
 | Q-2 | No overlay permission in v1 (section 5); the overlay step is removed from the install instructions | **Confirmed by owner, 2026-10-29**; superseded 2026-10-30 by the owner's GO for the bubble (section 15), which is off by default |
 | Q-3 | Freshness window of 120 seconds (ACP-12) | **Confirmed by owner, 2026-10-29** |
 | Q-4 | On-device recognizer first; system recognizer only after a one-time opt-in (FR-2.2) | **Confirmed by owner, 2026-10-29** |
 | Q-5 | How to read the screen when Pip fills it | **Resolved 2026-10-30** by the bubble long press (FR-B.6), under the owner's `/goal` |
-| Q-6 | Swiping S1 away: re-post or stop Pip | Open — current behavior re-posts S1 (FR-1.2) |
+| Q-6 | Swiping S1 away: re-post or stop Pip | **Resolved by the owner (2026-10-30):** re-post S1 (FR-1.2). Only the Stop action turns Pip off |

@@ -146,6 +146,38 @@ the reference, but CI should catch crashes first.
     `ok S1 notification posted`, `ok no crash`, `SMOKE PASS`.
   - Merge after CI is green on this commit.
 
+## Task 8 — Owner decisions and more device checks in CI (after the goal check)
+
+- [x] Q-6 resolved (re-post S1) and Q-1 deferred (no server yet), from the
+  owner's answers; `SPEC.md` updated.
+- [x] Smoke test extended: « Arrêter » on S1 stops Pip, the home then offers
+  « Allumer Pip » (FR), and "Turn Pip on" shows in English.
+- [x] Bug found by the emulator and fixed: with the app locale `[fr]`, the
+  whole app showed English.
+  - Android merges app and system locales (`[fr, en-US]`). With several
+    locales, it matches only explicitly qualified resources, and French sat
+    in unqualified `values/`.
+  - The same bug hits a phone set to French then English.
+  - Fix: French moves to `values-fr/`, and `values/` becomes the English
+    fallback. `android:localeConfig` declares fr and en, so the owner can
+    pick Pip's language in Android settings.
+- [x] CI green on `22434d2` (runs 40999283018 / 40999278378): build, then
+  smoke `ok Stop on S1 stopped Pip`, `ok home shows « Allumer Pip » (FR)`,
+  `ok home shows "Turn Pip on" (EN)`, `SMOKE PASS`.
+- [x] Stop tap made robust in `71c3b9e`: on `8035f4e` the push run passed
+  but the pull_request run failed. The tap position had been read while the
+  shade was still settling. The script now taps only after two identical
+  reads and retries up to 3 times.
+  - Runs 41000243820 / 41000238706, both green.
+  - The home screen shows French end to end (« Il est tard… Pip chuchote :
+    je suis là. », « Allumer Pip »).
+  - Stop worked on attempt 1; `SMOKE PASS`.
+- [x] Merge PR #8 after CI is green on its head.
+
+Still owner-only, on the phone: bubble gestures over another app, the
+assistant gesture on the owner's phone model, the S10 approval card with a
+live brain (approve / refuse / 1 s arming).
+
 ## Out of scope (stated, not built)
 
 - Wake word: the owner chose push-to-talk.
