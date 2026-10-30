@@ -19,6 +19,7 @@ import ca.michael.pip.core.brain.UrlConnectionTransport
 import ca.michael.pip.core.journal.EventKind
 import ca.michael.pip.journal.FileJournal
 import ca.michael.pip.notebook.NotebookStore
+import ca.michael.pip.screen.Capture
 import ca.michael.pip.security.SecretStore
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
@@ -46,6 +47,9 @@ class PipRuntime(private val app: Context) {
 
     /** The last snapshot the owner captured on the device; `snapshot.last` reads only this. */
     @Volatile var lastOwnerSnapshot: String? = null
+
+    /** A screen read the owner asked for with a long press on the bubble; consumed by the next turn (FR-B.6). */
+    @Volatile var bubbleLook: Capture? = null
 
     @Volatile private var acpLink: AcpConnection? = null
 

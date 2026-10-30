@@ -150,8 +150,15 @@ class DeviceActionRunner(private val activity: Activity) {
             done(try { startOnMain(prepared, choice) } catch (e: Exception) { "failed: ${e.javaClass.simpleName}" })
             return
         }
-        if (action == DeviceAction.GetLocation) { location(done); return }
-        if (action == DeviceAction.GetSteps) { steps(done); return }
+        // Sensors can throw (permission revoked, provider gone): report it, never crash.
+        if (action == DeviceAction.GetLocation) {
+            try { location(done) } catch (e: Exception) { done("failed: ${e.javaClass.simpleName}") }
+            return
+        }
+        if (action == DeviceAction.GetSteps) {
+            try { steps(done) } catch (e: Exception) { done("failed: ${e.javaClass.simpleName}") }
+            return
+        }
         io.execute {
             val result = try { runNow(action, choice) } catch (e: Exception) { "failed: ${e.javaClass.simpleName}" }
             main.post { done(result) }
@@ -350,7 +357,9 @@ class DeviceActionRunner(private val activity: Activity) {
     private fun location(done: (String) -> Unit) {
         val lm = activity.getSystemService(LocationManager::class.java)
         val enabled = lm.getProviders(true)
-        val provider = listOf(LocationManager.FUSED_PROVIDER, LocationManager.NETWORK_PROVIDER, LocationManager.GPS_PROVIDER)
+        // GPS needs the precise permission; with approximate only, use the other providers.
+        val fine = activity.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        val provider = listOfNotNull(LocationManager.FUSED_PROVIDER, LocationManager.NETWORK_PROVIDER, if (fine) LocationManager.GPS_PROVIDER else null)
             .firstOrNull { it in enabled } ?: run { done("failed: location is turned off"); return }
         val finished = AtomicBoolean(false)
         val cancel = CancellationSignal()

@@ -49,7 +49,9 @@ cloche ? Il te le dit franchement : c'est juste un *petit pépin*.
 | 🧠 | Cerveau au choix | N'importe quel point d'accès compatible OpenAI, en `https://`, avec **ta** clé — scellée par le Keystore |
 | 📓 | Carnet | Notes, promesses, rappels — chiffré AES-GCM, consultable et effaçable par toi |
 | 📡 | Tâches à distance (ACP) | Connexion **sortante** `wss://` vers ton orchestrateur, enveloppes signées, quatre intentions seulement |
-| 🫧 | **Bulle** (bloc B) | Une petite poche flottante par-dessus les autres apps : touche-la pour parler à Pip. Optionnelle, visible seulement quand Pip est allumé |
+| 🫧 | **Bulle** (bloc B) | Une petite poche flottante par-dessus les autres apps : **touche** pour parler, **appui long** pour que Pip lise l'app en dessous. Optionnelle, visible seulement quand Pip est allumé |
+| 🎙️ | **Bouton pour parler** | Pip comme assistant Android : appui long sur ton bouton → Pip écoute. Aussi « Parler » dans la notification. Pas de mot d'éveil, pas d'écoute continue |
+| 😄 | **Personnalité** | Salutation selon l'heure, clin d'œil quand une action réussit, réplique quand tu touches son visage, suggestions en un toucher |
 | 🔔 | **Notifications** (bloc C) | Pip lit et résume les notifications affichées, **seulement quand tu le demandes** et après ton oui — rien n'est lu à l'arrivée |
 | 📱 | **Actions sur le téléphone** (bloc A) | Appeler, texter, lire tes textos, appels, contacts, calendrier, position, pas ; ouvrir une app ; ajouter un événement — le cerveau propose, **tu approuves chaque action** |
 | 🛡️ | Permissions | Chacune demandée au moment où une action approuvée en a besoin, et justifiée dans [`PERMISSIONS.md`](PERMISSIONS.md) |
@@ -184,7 +186,8 @@ distribution, no release signing.
 | `app/.../screen/PipAccessibilityService.kt` | Read-only screen capture on request (V1-3) |
 | `app/.../acp/AcpConnection.kt` | Outbound WebSocket, verify-then-broker (V1-6) |
 | `app/.../actions/DeviceActionRunner.kt` | Block A: prepares each S10 card (local contact lookup) and runs approved actions |
-| `app/.../bubble/BubbleController.kt` | Block B: the optional floating bubble, only while Pip runs |
+| `app/.../bubble/BubbleController.kt` | Block B: the optional floating bubble, only while Pip runs; long press reads the app underneath |
+| `app/.../ui/Fun.kt` | Pip's personality: time-of-day greeting, quips, suggestion chips |
 | `app/.../notify/PipNotificationListener.kt` | Block C: reads shown notifications only for an approved action |
 | `app/.../acp/DeviceTaskExecutor.kt` | Runs the four approved intents |
 | `app/.../ui/MainActivity.kt` | S2 Home and S9 excerpt approval |
@@ -407,9 +410,9 @@ The APK is never committed (`.gitignore`, gate check "apk in tree").
 
 - **Q-1** (SPEC): orchestrator hostname. Until answered,
   `ACP_ALLOWLIST` is empty and the ACP client refuses to connect.
-- **Screen context in full screen** — see the Phase 5 report: when Pip fills
-  the screen, the other app is not on screen, so a capture finds only Pip's
-  own window (excluded by FR-3.4). It works in split screen.
+- **Screen context in full screen** — solved by the bubble long press
+  (SPEC FR-B.6): long-press the bubble over any app, and Pip reads that app
+  for your next question. The S2 toggle still works in split screen.
 - **Swiping S1 away** — Android 14+ lets the owner dismiss foreground
   notifications. Pip re-posts S1 immediately (FR-1.2).
   <https://developer.android.com/about/versions/14/behavior-changes-all#non-dismissable-notifications>

@@ -52,6 +52,25 @@ class BrainClientTest {
         assertTrue("\"max_tokens\":1024" in t.lastBody)
     }
 
+    /** Some servers refuse max_tokens and ask for max_completion_tokens: retry once with it. */
+    @Test fun retriesWithMaxCompletionTokensWhenAsked() {
+        val bodies = mutableListOf<String>()
+        val t = object : HttpTransport {
+            override fun postJson(url: String, headers: Map<String, String>, body: String): HttpResponse {
+                bodies += body
+                return if (bodies.size == 1) {
+                    HttpResponse(400, """{"error":{"message":"Unsupported parameter: 'max_tokens' is not supported with this model. Use 'max_completion_tokens' instead."}}""")
+                } else {
+                    HttpResponse(200, """{"choices":[{"message":{"content":"ok"}}]}""")
+                }
+            }
+            override fun cancel() {}
+        }
+        assertEquals(BrainResult.Answer("ok"), BrainClient(t) { true }.ask(good, msgs))
+        assertEquals(2, bodies.size)
+        assertTrue("\"max_completion_tokens\":1024" in bodies[1] && "\"max_tokens\"" !in bodies[1])
+    }
+
     @Test fun serverReasonIsShownWithKeyMasked() {
         val body = """{"type":"error","error":{"type":"invalid_request_error","message":"bad request for key k: model x"}}"""
         val r = BrainClient(Recorder { HttpResponse(400, body) }) { true }.ask(good.copy(key = "SECRET-123"), msgs)

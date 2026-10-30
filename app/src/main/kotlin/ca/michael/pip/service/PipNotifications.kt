@@ -67,7 +67,8 @@ class PipNotifications(private val context: Context) {
             .setContentIntent(activity(MainActivity::class.java, 1))
             .setDeleteIntent(service(PipService.ACTION_REPOST, 3))
             .addAction(Notification.Action.Builder(null, context.getString(R.string.action_stop), service(PipService.ACTION_STOP, 2)).build())
-            .addAction(Notification.Action.Builder(null, context.getString(R.string.action_open), activity(MainActivity::class.java, 4)).build())
+            // Push to talk (SPEC 16): the content tap already opens Pip, so this slot is « Parler ».
+            .addAction(Notification.Action.Builder(null, context.getString(R.string.action_talk), talk()).build())
         if (pending > 0) {
             builder.addAction(Notification.Action.Builder(null, context.getString(R.string.action_see_task), activity(TaskApprovalActivity::class.java, 5)).build())
         }
@@ -88,7 +89,16 @@ class PipNotifications(private val context: Context) {
             .build())
     }
 
+    /** On the lock screen, personal text is replaced by this neutral line (notebook stays private). */
+    private fun publicVersion(channel: String) = Notification.Builder(context, channel)
+        .setSmallIcon(R.drawable.ic_notification)
+        .setContentTitle(context.getString(R.string.app_name))
+        .setContentText(context.getString(R.string.lock_screen_line))
+        .build()
+
     fun reminder(entry: NotebookEntry) = manager.notify(entry.id.hashCode(), Notification.Builder(context, CH_REMINDERS)
+        .setVisibility(Notification.VISIBILITY_PRIVATE)
+        .setPublicVersion(publicVersion(CH_REMINDERS))
         .setSmallIcon(R.drawable.ic_notification)
         .setContentTitle(context.getString(R.string.app_name))
         .setContentText(context.getString(R.string.reminder_due, entry.text))
@@ -105,6 +115,8 @@ class PipNotifications(private val context: Context) {
         .build())
 
     fun orchestratorMessage(text: String) = manager.notify(ID_MESSAGE, Notification.Builder(context, CH_REMINDERS)
+        .setVisibility(Notification.VISIBILITY_PRIVATE)
+        .setPublicVersion(publicVersion(CH_REMINDERS))
         .setSmallIcon(R.drawable.ic_notification)
         .setContentTitle(context.getString(R.string.app_name))
         .setContentText(context.getString(R.string.orchestrator_message, text))
@@ -115,6 +127,14 @@ class PipNotifications(private val context: Context) {
 
     private fun activity(cls: Class<*>, code: Int) = PendingIntent.getActivity(
         context, code, Intent(context, cls).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP),
+        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+    )
+
+    private fun talk() = PendingIntent.getActivity(
+        context, 10,
+        Intent(context, MainActivity::class.java)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            .putExtra(MainActivity.EXTRA_TALK, true),
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
     )
 

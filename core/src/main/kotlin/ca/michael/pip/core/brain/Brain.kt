@@ -136,9 +136,18 @@ class BrainClient(
         if (config.model.isBlank()) return BrainResult.NotConfigured
         if (!networkAvailable()) return BrainResult.NoNetwork
 
+        val first = send(config, base, messages, tools, "max_tokens")
+        // Some servers refuse max_tokens and name max_completion_tokens instead: retry once with it.
+        if (first is BrainResult.ServerError && first.code == 400 && first.detail?.contains("max_completion_tokens") == true) {
+            return send(config, base, messages, tools, "max_completion_tokens")
+        }
+        return first
+    }
+
+    private fun send(config: BrainConfig, base: String, messages: List<ChatMessage>, tools: JsonArray?, capField: String): BrainResult {
         val payload = buildJsonObject {
             put("model", JsonPrimitive(config.model))
-            put("max_tokens", JsonPrimitive(TurnBuilder.MAX_ANSWER_TOKENS))
+            put(capField, JsonPrimitive(TurnBuilder.MAX_ANSWER_TOKENS))
             put("messages", JsonArray(messages.map { encode(it) }))
             if (tools != null && tools.isNotEmpty()) put("tools", tools)
         }.toString()
@@ -170,7 +179,7 @@ class BrainClient(
         val message = Json.parseToJsonElement(body).jsonObject
             .getValue("error").jsonObject
             .getValue("message").jsonPrimitive.content
-        (if (key.isNotEmpty()) message.replace(key, "[clé]") else message).replace(Regex("\\s+"), " ").trim().take(MAX_DETAIL).ifBlank { null }
+        (if (key.length >= 8) message.replace(key, "[clé]") else message).replace(Regex("\\s+"), " ").trim().take(MAX_DETAIL).ifBlank { null }
     } catch (e: Exception) {
         null
     }

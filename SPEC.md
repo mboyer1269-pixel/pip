@@ -528,13 +528,41 @@ Package visibility: a `<queries>` entry for launcher activities
   moves the bubble; its place is remembered. The bubble reads nothing and
   sends nothing by itself.
 - FR-B.5 The bubble window is not focusable and takes no input other than
-  taps and drags on itself.
+  taps, long presses and drags on itself. Its place is clamped to the screen.
+- FR-B.6 **Long press = « regarde l'écran ».** A long press on the bubble is
+  the owner's explicit request (FR-3.1) to read the app underneath. The
+  accessibility service captures it (Pip's own windows stay excluded,
+  FR-3.4). Pip then opens listening, and the snapshot is attached to the
+  next turn only and shown under « Voir ce que j'ai lu ». With accessibility
+  off, Pip says how to turn it on and reads nothing. This answers the
+  full-screen gap noted in Phase 5.
 
 | ID | Test |
 |---|---|
 | T-B1 | Bubble off by default; turning it on without the permission opens the system screen |
 | T-B2 | With Pip stopped there is no bubble; Stop removes it |
 | T-B3 | Tapping the bubble opens Pip listening |
+
+## 16. Push to talk (owner `/goal` 2026-10-30)
+
+Design: `docs/superpowers/specs/2026-10-30-push-to-talk-design.md`.
+
+- FR-P.1 `MainActivity` handles `android.intent.action.ASSIST`, so the owner
+  can pick Pip as Android's digital assistant in system settings. Pip never
+  requests the role itself. The assistant gesture opens Pip listening.
+- FR-P.2 S1's second action is « Parler » / "Talk", which opens Pip
+  listening. Tapping the notification itself still opens Pip.
+- FR-P.3 If Pip is off when a push-to-talk gesture arrives, it turns on (the
+  gesture is the owner's explicit action, FR-1.1) and then listens. If the
+  notification permission is refused, the usual explanation is shown and
+  nothing listens.
+- FR-P.4 No wake word, no listening the owner did not start.
+
+| ID | Test |
+|---|---|
+| T-P1 | With Pip chosen as assistant, the assistant gesture opens Pip listening |
+| T-P2 | « Parler » on S1 opens Pip listening |
+| T-P3 | With Pip off, the gesture turns Pip on (S1 appears) and listens |
 
 ## 12. Owner questions
 
@@ -544,3 +572,5 @@ Package visibility: a `<queries>` entry for launcher activities
 | Q-2 | No overlay permission in v1 (section 5); the overlay step is removed from the install instructions | **Confirmed by owner, 2026-10-29**; superseded 2026-10-30 by the owner's GO for the bubble (section 15), which is off by default |
 | Q-3 | Freshness window of 120 seconds (ACP-12) | **Confirmed by owner, 2026-10-29** |
 | Q-4 | On-device recognizer first; system recognizer only after a one-time opt-in (FR-2.2) | **Confirmed by owner, 2026-10-29** |
+| Q-5 | How to read the screen when Pip fills it | **Resolved 2026-10-30** by the bubble long press (FR-B.6), under the owner's `/goal` |
+| Q-6 | Swiping S1 away: re-post or stop Pip | Open — current behavior re-posts S1 (FR-1.2) |

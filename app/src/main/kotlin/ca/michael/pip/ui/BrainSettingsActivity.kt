@@ -1,6 +1,7 @@
 package ca.michael.pip.ui
 
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -79,6 +80,18 @@ class BrainSettingsActivity : Activity() {
             }
         })
         col.addView(Ui.text(this, getString(R.string.bubble_note), 13f))
+
+        // SPEC 16: the owner picks Pip as assistant in Android's own screen (never a role request).
+        col.addView(Ui.spacer(this, 20))
+        col.addView(Ui.text(this, getString(R.string.assistant_section), 18f, bold = true))
+        col.addView(Ui.button(this, getString(R.string.assistant_button)) {
+            try {
+                startActivity(Intent(Settings.ACTION_VOICE_INPUT_SETTINGS))
+            } catch (e: ActivityNotFoundException) {
+                startActivity(Intent(Settings.ACTION_MANAGE_DEFAULT_APPS_SETTINGS))
+            }
+        })
+        col.addView(Ui.text(this, getString(R.string.assistant_note), 13f))
 
         col.addView(Ui.spacer(this, 20))
         col.addView(Ui.text(this, getString(R.string.voice_section), 18f, bold = true))
