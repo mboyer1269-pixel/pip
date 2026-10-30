@@ -59,13 +59,15 @@ Guiding principles:
 
 Listed so Phase B does not reintroduce them by accident: an always-listening
 offline wake word; a floating on-screen avatar drawn over other apps; any
-local network server; reading other apps' notifications; screenshots
-or screen recording; changing system input settings; a remote "hub" mode
+local network server; screenshots or screen recording; changing system input settings; a remote "hub" mode
 that hands the whole conversation to a server.
 
 Moved into **Block A** (section 13, owner GO 2026-10-30): reading and
 sending SMS; reading the call log and contacts; placing calls; calendar
 access; location; step counting; launching installed apps.
+
+Moved into **Block C** (section 14, owner GO 2026-10-30): reading other
+apps' notifications, on request.
 
 ## 3. Surfaces
 
@@ -479,6 +481,34 @@ Package visibility: a `<queries>` entry for launcher activities
 | T-A4 | No more than 3 actions per turn are shown |
 | T-A5 | With `actions_enabled` off, the request carries no tools |
 | T-A6 | Every new permission appears in `PERMISSIONS.md` |
+
+## 14. Block C — Pip reads notifications (owner GO 2026-10-30)
+
+- FR-C.1 A notification listener service lets Pip read the notifications
+  currently shown on the phone. The owner turns it on in the system
+  "Notification access" screen; Pip opens that screen from S3 or when the
+  action needs it.
+- FR-C.2 The service reads **nothing on its own**: it does not react to
+  notifications as they arrive. It reads only when an approved
+  `read_notifications` action asks for it.
+- FR-C.3 `read_notifications` is added to the closed list of section 13.2
+  and follows every Block A rule (S10 card, one decision, reads sent to the
+  brain only after approval).
+
+| Action | Effect when approved | Arguments |
+|---|---|---|
+| `read_notifications` | Read the notifications currently shown (app, title, text, time) and send them to the brain | `app` (optional, app name), `limit` (1–20, default 10) |
+
+- FR-C.4 Skipped: Pip's own notifications, ongoing notifications (media,
+  navigation, downloads) and group summaries. Each text is cut at 200
+  characters.
+- FR-C.5 The service is protected by `BIND_NOTIFICATION_LISTENER_SERVICE`
+  (held by the system only) and is the third exported component.
+
+| ID | Test |
+|---|---|
+| T-C1 | `read_notifications` validates `limit` and `app` like other actions |
+| T-C2 | With notification access off, the action says how to turn it on and sends nothing |
 
 ## 12. Owner questions
 

@@ -58,6 +58,15 @@ class ActionsTest {
         assertEquals(DeviceAction.GetSteps, ok("get_steps", ""))
     }
 
+    /** T-C1: Block C action follows the same validation. */
+    @Test fun readNotificationsIsValidated() {
+        assertEquals(DeviceAction.ReadNotifications(null, 10), ok("read_notifications", "{}"))
+        assertEquals(DeviceAction.ReadNotifications("Messenger", 3), ok("read_notifications", """{"app":"Messenger","limit":3}"""))
+        assertTrue(rejected("read_notifications", """{"limit":21}"""))
+        assertTrue(rejected("read_notifications", """{"package":"x"}"""))
+        assertTrue(ok("read_notifications", "{}").sendsDataToBrain)
+    }
+
     @Test fun readsAreMarkedAsSendingData() {
         assertTrue(ok("read_call_log", "{}").sendsDataToBrain)
         assertTrue(DeviceAction.GetLocation.sendsDataToBrain)

@@ -19,6 +19,7 @@ import android.os.Looper
 import android.provider.CalendarContract
 import android.provider.CallLog
 import android.provider.ContactsContract
+import android.provider.Settings
 import android.provider.Telephony
 import android.telephony.SmsManager
 import ca.michael.pip.R
@@ -26,6 +27,7 @@ import ca.michael.pip.core.actions.ActionCatalog
 import ca.michael.pip.core.actions.DeviceAction
 import ca.michael.pip.core.actions.Recipient
 import ca.michael.pip.core.text.TextMatch
+import ca.michael.pip.notify.PipNotificationListener
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -87,6 +89,8 @@ class DeviceActionRunner(private val activity: Activity) {
         is DeviceAction.AddCalendarEvent -> listOf(Manifest.permission.READ_CALENDAR, Manifest.permission.WRITE_CALENDAR)
         DeviceAction.GetLocation -> listOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION)
         DeviceAction.GetSteps -> listOf(Manifest.permission.ACTIVITY_RECOGNITION)
+        // Notification access is a system screen, not a runtime permission (SPEC 14).
+        is DeviceAction.ReadNotifications -> emptyList()
     }
 
     fun prepare(action: DeviceAction, done: (Prepared) -> Unit) {
@@ -118,6 +122,14 @@ class DeviceActionRunner(private val activity: Activity) {
             action.start.format(shown), action.durationMinutes) + (action.location?.let { "\n" + s(R.string.act_event_place, it) } ?: ""))
         DeviceAction.GetLocation -> Prepared.Ready(action, s(R.string.act_location))
         DeviceAction.GetSteps -> Prepared.Ready(action, s(R.string.act_steps))
+        is DeviceAction.ReadNotifications -> if (!PipNotificationListener.granted(activity)) {
+            // T-C2: say how to turn it on, open the screen, send nothing.
+            main.post { activity.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)) }
+            Prepared.Failed("notification access is off", s(R.string.act_notif_access_off))
+        } else {
+            Prepared.Ready(action, action.app?.let { s(R.string.act_read_notifications_from, action.limit, it) }
+                ?: s(R.string.act_read_notifications, action.limit))
+        }
     }
 
     private fun noContact(to: Recipient) = (to as Recipient.Name).let {
@@ -175,6 +187,8 @@ class DeviceActionRunner(private val activity: Activity) {
         is DeviceAction.ReadCallLog -> readCalls(action.limit)
         is DeviceAction.ReadCalendar -> readCalendar(action)
         is DeviceAction.AddCalendarEvent -> addEvent(action)
+        is DeviceAction.ReadNotifications -> PipNotificationListener.read(action.app, action.limit)
+            ?: run { PipNotificationListener.rebind(activity); "failed: notification access is starting, ask again in a moment" }
         else -> "failed: wrong path"
     }
 

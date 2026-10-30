@@ -245,6 +245,8 @@ Title: the S7 line « Pip attend ton oui — sans lui, rien ne bouge. » /
 | `add_calendar_event` | J'ajoute à ton calendrier : « {titre} », {date}, pour {n} minutes. | I'll add to your calendar: "{title}", {date}, for {n} minutes. |
 | `get_location` | Je lis ta position actuelle et je l'envoie à mon cerveau. | I'll read your current position and send it to my brain. |
 | `get_steps` | Je lis ton compteur de pas (depuis le dernier redémarrage du téléphone) et je l'envoie à mon cerveau. | I'll read your step counter (since the phone last restarted) and send it to my brain. |
+| `read_notifications` | Je lis tes {n} dernières notifications affichées et je les envoie à mon cerveau. | I'll read your last {n} notifications on screen and send them to my brain. |
+| Notification access off | Pour lire tes notifications, active « Pip » dans Accès aux notifications. Je t'ouvre l'écran. | To read your notifications, turn on "Pip" in Notification access. I'm opening the screen. |
 | Several contacts | Plusieurs contacts correspondent. Choisis le bon : | Several contacts match. Pick the right one: |
 | Read actions | Ce que je lis part à mon cerveau pour cette réponse seulement. Si tu refuses, rien ne part. | What I read goes to my brain for this answer only. If you refuse, nothing leaves. |
 | Permission refused | Sans cette permission, je ne peux pas le faire. Rien n'a été fait. | Without that permission I can't do it. Nothing was done. |

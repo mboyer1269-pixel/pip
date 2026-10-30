@@ -224,4 +224,12 @@
     <string name="act_failed">That didn\'t work on my side. Nothing was done.</string>
     <string name="act_round_limit">I\'ll stop there for this turn. Ask me again if you want to keep going.</string>
     <string name="actions_toggle">Let Pip propose actions on the phone (always with your yes)</string>
+
+    <string name="act_read_notifications">I\'ll read your last %1$d notifications on screen and send them to my brain.</string>
+    <string name="act_read_notifications_from">I\'ll read your last %1$d notifications from \"%2$s\" and send them to my brain.</string>
+    <string name="act_notif_access_off">To read your notifications, turn on \"Pip\" in Notification access. I\'m opening the screen.</string>
+    <string name="notif_listener_label">Pip — notification reading</string>
+    <string name="cap_notif_access">Notification access</string>
+    <string name="cap_notif_access_gives">I read your notifications when you ask, never otherwise.</string>
+    <string name="cap_notif_access_lost">I can\'t see your notifications; everything else works.</string>
 </resources>

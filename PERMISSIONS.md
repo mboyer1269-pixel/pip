@@ -48,6 +48,10 @@ location and the step counter are marked `required="false"`.
 |---|---|---|---|
 | `android.permission.BIND_ACCESSIBILITY_SERVICE` | Set as `android:permission` on `PipAccessibilityService`, so only the system can bind it. It is not requested by Pip; the owner turns the service on in system Accessibility settings | No screen context (FR-3.6); everything else works | When the owner taps "Ouvrir les réglages" on the Accessibility row of S3 |
 
+| Permission | Function | If refused | When asked |
+|---|---|---|---|
+| `android.permission.BIND_NOTIFICATION_LISTENER_SERVICE` | Set as `android:permission` on `PipNotificationListener` (Block C), so only the system can bind it. Not requested by Pip; the owner grants "Notification access" in system settings | Pip cannot read notifications; everything else works | From S3, or when an approved `read_notifications` finds access off |
+
 ## Package visibility (`<queries>`)
 
 Not a permission. Pip declares two intent queries so Android lets it see the
@@ -61,11 +65,12 @@ engines it uses, and nothing else (no package listing, no
 
 ## Exported components (SEC-4 exceptions)
 
-Every component is `android:exported="false"` except:
+Every component is `android:exported="false"` except these three:
 
 | Component | Why exported |
 |---|---|
 | `ui.MainActivity` | Launcher activity: the home screen must be able to start it. It accepts only the `MAIN`/`LAUNCHER` intent and reads no extras. |
+| `notify.PipNotificationListener` | Block C (SPEC 14). The system binds notification listeners; protected by `BIND_NOTIFICATION_LISTENER_SERVICE`, which only the system holds. The owner turns it on in the system "Notification access" screen. It reads only for an approved `read_notifications` action. |
 | `screen.PipAccessibilityService` | The system binds accessibility services; it is protected by `BIND_ACCESSIBILITY_SERVICE`, which only the system holds. UNKNOWN: whether `exported="false"` would also work for a system-bound accessibility service — kept `true` per <https://developer.android.com/guide/topics/ui/accessibility/service> |
 
 ## Not requested in v1

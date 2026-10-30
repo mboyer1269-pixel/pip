@@ -236,4 +236,13 @@
     <string name="act_failed">Ça n\'a pas marché de mon côté. Rien n\'a été fait.</string>
     <string name="act_round_limit">Je m\'arrête là pour ce tour. Redemande-moi si tu veux continuer.</string>
     <string name="actions_toggle">Laisser Pip proposer des actions sur le téléphone (toujours avec ton oui)</string>
+
+    <!-- Block C -->
+    <string name="act_read_notifications">Je lis tes %1$d dernières notifications affichées et je les envoie à mon cerveau.</string>
+    <string name="act_read_notifications_from">Je lis tes %1$d dernières notifications de « %2$s » et je les envoie à mon cerveau.</string>
+    <string name="act_notif_access_off">Pour lire tes notifications, active « Pip » dans Accès aux notifications. Je t\'ouvre l\'écran.</string>
+    <string name="notif_listener_label">Pip — lecture des notifications</string>
+    <string name="cap_notif_access">Accès aux notifications</string>
+    <string name="cap_notif_access_gives">Je lis tes notifications quand tu me le demandes, jamais autrement.</string>
+    <string name="cap_notif_access_lost">Je ne vois pas tes notifications ; le reste marche.</string>
 </resources>
