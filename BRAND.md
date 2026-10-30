@@ -357,7 +357,7 @@ Animations respect the system "remove animations" setting.
 
 ## 6. Checklist for Phase 5
 
-- [ ] Strings written in `values/` (FR) and `values-en/` (EN) from section 4.
+- [ ] Strings written in `values-fr/` (FR) and `values/` (EN, fallback) from section 4.
 - [ ] Vector drawables drawn from section 5, never from an external file.
 - [ ] Debug label and badge distinct (SEC-5).
 - [ ] Contrast of section 5.2 pairs checked and recorded.

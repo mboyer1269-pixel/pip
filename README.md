@@ -198,7 +198,7 @@ distribution, no release signing.
 | `app/.../ui/TaskApprovalActivity.kt` | S7 Task approval |
 | `app/.../ui/JournalActivity.kt` | S8 Task journal |
 | `app/.../ui/PipFaceView.kt`, `Ui.kt` | Pip's animated face; view helpers |
-| `app/src/main/res/` | FR strings (`values/`), EN strings (`values-en/`), colors, icons, XML configs |
+| `app/src/main/res/` | FR strings (`values-fr/`), EN strings (`values/`, also the fallback), colors, icons, XML configs |
 | `app/src/debug/res/` | Debug label "Pip (debug)" and icon badge (SEC-5) |
 | `scripts/clean-room-gate.sh` | Similarity and secrets gate |
 | `scripts/check-permissions.sh` | T-12 |

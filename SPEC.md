@@ -374,6 +374,8 @@ are inherited from anywhere; Phase B sets them and lists them in the README.
 **App language.** Pip declares the languages it ships (French, English), so
 the owner can pick Pip's language in Android's own per-app language screen
 (Android 13+). It is not a Pip setting; it follows the device by default.
+Any French locale gets French, even when English is also in the device's
+list; a language Pip does not ship falls back to English.
 
 ## 10. Acceptance tests (minimum for Phases 5–7)
 

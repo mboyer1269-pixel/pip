@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Languages Pip ships (French in values/, English in values-en/). Lets the
+<!-- Languages Pip ships (French in values-fr/, English in values/). Lets the
      owner pick Pip's language in Android settings (Android 13+). -->
 <locale-config xmlns:android="http://schemas.android.com/apk/res/android">
     <locale android:name="fr" />

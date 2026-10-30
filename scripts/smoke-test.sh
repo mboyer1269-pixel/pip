@@ -107,7 +107,7 @@ adb shell am start -W -n "$pkg/ca.michael.pip.ui.MainActivity" >/dev/null
 wait_text "Allumer Pip" || { ui_labels; false; } || fail "home does not offer « Allumer Pip » after Stop"
 echo "ok   home shows « Allumer Pip » (FR)"
 
-# English strings (values-en) load when the app locale is English.
+# English strings (values/) load when the app locale is English.
 adb shell cmd locale set-app-locales "$pkg" --locales en >/dev/null
 adb shell am force-stop "$pkg"
 adb shell am start -W -n "$pkg/ca.michael.pip.ui.MainActivity" >/dev/null
