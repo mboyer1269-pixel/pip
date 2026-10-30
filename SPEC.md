@@ -59,11 +59,13 @@ Guiding principles:
 
 Listed so Phase B does not reintroduce them by accident: an always-listening
 offline wake word; a floating on-screen avatar drawn over other apps; any
-local network server; reading or sending SMS; reading the call log or
-contacts; placing calls; calendar access; location; step counting; listing
-or launching installed apps; reading other apps' notifications; screenshots
+local network server; reading other apps' notifications; screenshots
 or screen recording; changing system input settings; a remote "hub" mode
 that hands the whole conversation to a server.
+
+Moved into **Block A** (section 13, owner GO 2026-10-30): reading and
+sending SMS; reading the call log and contacts; placing calls; calendar
+access; location; step counting; launching installed apps.
 
 ## 3. Surfaces
 
@@ -81,6 +83,7 @@ voice (defined in `BRAND.md`). Descriptions below are functional only.
 | S7 | **Task approval** | One pending ACP task: intent name, plain-language description of exactly what will happen, arguments shown in full, time left before expiry | **Approve** or **Refuse** — one task at a time, no "always" option |
 | S8 | **Task journal** | Chronological list of ACP events with timestamp and outcome | View; clear journal (with confirmation) |
 | S9 | **Notebook-excerpt approval** | The exact excerpt Pip proposes to send to the brain for this turn | **Send this once** or **Don't send** |
+| S10 | **Action approval** (Block A) | One proposed device action in Pip's words: exactly what happens, to whom, what data is read and sent to the brain; a choice when a name matches several contacts | **Approve** (armed after 1 s) or **Refuse** — one action at a time, no "always" option |
 
 ## 4. Functional requirements
 
@@ -152,8 +155,9 @@ voice (defined in `BRAND.md`). Descriptions below are functional only.
   Phase B), the recent conversation of the current session, the owner's new
   words, and — only if attached for this turn — the screen snapshot and/or
   an approved notebook excerpt. Nothing else.
-- FR-4.7 v1 brain answers are text only. The brain cannot trigger device
-  actions in v1 (no tool calling to the device).
+- FR-4.7 The brain answers with text, or **proposes** device actions from
+  the closed list of section 13. A proposal never runs by itself: each one
+  goes through the owner's approval (FR-A.3).
 
 ### 4.5 V1-5 — Notebook
 
@@ -195,9 +199,9 @@ checked **at the moment of use**, never all at startup.
 | `RECORD_AUDIO` | speech recognition | typing only |
 | `BIND_ACCESSIBILITY_SERVICE` (protects Pip's service; granted by the owner in system settings) | screen context | no screen context |
 
-Not requested in v1: overlay (`SYSTEM_ALERT_WINDOW`) — no v1 function draws
-over other apps; boot receiver; any SMS, phone, contacts, calendar,
-location, camera, package-query, usage-stats or secure-settings permission.
+Not requested: overlay (`SYSTEM_ALERT_WINDOW`) — no function draws over
+other apps; boot receiver; camera; `QUERY_ALL_PACKAGES`; usage-stats;
+secure-settings. Block A adds its own permissions (section 13.4).
 
 ## 6. Data formats (defined for Pip)
 
@@ -359,7 +363,7 @@ sending SMS or placing calls.
 
 `brain_base_url`, `brain_model`, `brain_key` (encrypted), `acp_host`
 (chosen from the build allowlist), `acp_secret` (encrypted),
-`system_asr_opt_in`, `speech_language`, `speak_answers`. No default values
+`system_asr_opt_in`, `speech_language`, `speak_answers`, `actions_enabled`. No default values
 are inherited from anywhere; Phase B sets them and lists them in the README.
 
 ## 10. Acceptance tests (minimum for Phases 5–7)
@@ -389,6 +393,92 @@ are inherited from anywhere; Phase B sets them and lists them in the README.
   (Context7 is not available in this environment — see `SKILLS.md`).
 - Phase B never consults the inspected application (two-hats gate in
   `CLAUDE.md`).
+
+## 13. Block A — Pip acts on the phone (owner GO 2026-10-30)
+
+Pip can now act on the owner's phone, always with the owner's yes.
+
+### 13.1 Principle
+
+- FR-A.1 The brain may **propose** actions; only the closed list below
+  exists, declared in code. Anything else is rejected and nothing runs.
+- FR-A.2 Every action is shown on surface **S10 — Action approval** with
+  Pip's own words saying exactly what will happen (recipient name and
+  number, message text in full, event title and time, what data will be
+  read and sent to the brain).
+- FR-A.3 Nothing runs without **Approve** on S10. **Refuse** runs nothing
+  and the brain is told "refused by the owner". No "always allow", no
+  batch approval: one action, one decision. Approve is armed only after the
+  card has been on screen for 1 second.
+- FR-A.4 **Reads leave the device only after approval.** For a read action
+  (SMS, call log, calendar, location, steps, contacts), S10 says that the
+  result will be sent to the brain for this turn; refusal sends nothing.
+- FR-A.5 Name resolution stays local. When a name matches several
+  contacts, S10 lets the owner pick one; the candidate list is never sent
+  to the brain.
+- FR-A.6 At most 3 actions per turn and 2 follow-up rounds with the brain.
+  A new turn cancels any action still waiting.
+- FR-A.7 Each permission is asked at the moment an approved action first
+  needs it. If refused, the action reports "permission refused" and
+  nothing else happens. One exception: when the brain names a person,
+  `READ_CONTACTS` is asked before S10 so the card can show the exact name
+  and number; that lookup stays on the device (FR-A.5).
+- FR-A.8 Remote ACP tasks still cannot send SMS or place calls (section
+  7.5 is unchanged). Block A actions start only from the owner's own turn
+  on the device.
+- FR-A.9 The owner can turn actions off in Settings (`actions_enabled`);
+  the brain then receives no action list.
+
+### 13.2 Closed list of actions
+
+| Action | Effect when approved | Arguments |
+|---|---|---|
+| `open_app` | Launch an installed app by its visible name | `app_name` |
+| `call` | Place a call | `to` (name or number) |
+| `send_sms` | Send an SMS | `to` (name or number), `text` (≤ 1000 chars) |
+| `find_contact` | Read matching contacts (name, numbers) and send them to the brain | `name` |
+| `read_sms` | Read recent received SMS and send them to the brain | `from` (optional), `limit` (1–10, default 5) |
+| `read_call_log` | Read recent calls and send them to the brain | `limit` (1–10, default 5) |
+| `read_calendar` | Read events in a date range and send them to the brain | `from_date` (YYYY-MM-DD, default today), `days` (1–14, default 1) |
+| `add_calendar_event` | Add an event to the primary calendar | `title`, `start` (YYYY-MM-DDTHH:MM, local), `duration_minutes` (5–1440, default 60), `location` (optional) |
+| `get_location` | Read the current position and send it to the brain | none |
+| `get_steps` | Read the step counter (steps since the last reboot) and send it to the brain | none |
+
+### 13.3 Brain protocol
+
+The actions are offered to the brain as OpenAI-compatible `tools`
+(function calling). Tool calls are untrusted proposals (SEC-9): arguments
+are validated against the list above before S10 is shown. After the
+owner's decisions, the tool results go back to the brain in the same turn
+so it can answer in words. Conversation history keeps only the owner's
+words and Pip's final answer, never tool results.
+
+### 13.4 Permissions added by Block A
+
+| Permission | Action |
+|---|---|
+| `CALL_PHONE` | `call` |
+| `SEND_SMS` | `send_sms` |
+| `READ_SMS` | `read_sms` |
+| `READ_CALL_LOG` | `read_call_log` |
+| `READ_CONTACTS` | `find_contact`; resolving a name for `call` / `send_sms` |
+| `READ_CALENDAR`, `WRITE_CALENDAR` | `read_calendar`, `add_calendar_event` |
+| `ACCESS_COARSE_LOCATION`, `ACCESS_FINE_LOCATION` | `get_location` (foreground only, never in the background) |
+| `ACTIVITY_RECOGNITION` | `get_steps` |
+
+Package visibility: a `<queries>` entry for launcher activities
+(`MAIN`/`LAUNCHER`) so `open_app` can find apps. No `QUERY_ALL_PACKAGES`.
+
+### 13.5 Acceptance tests
+
+| ID | Test |
+|---|---|
+| T-A1 | A proposed action does nothing until Approve; Refuse runs nothing and the brain receives "refused" |
+| T-A2 | An action name outside 13.2 is rejected; arguments out of range are rejected |
+| T-A3 | A name matching several contacts shows a local choice; no candidate list reaches the brain |
+| T-A4 | No more than 3 actions per turn are shown |
+| T-A5 | With `actions_enabled` off, the request carries no tools |
+| T-A6 | Every new permission appears in `PERMISSIONS.md` |
 
 ## 12. Owner questions
 

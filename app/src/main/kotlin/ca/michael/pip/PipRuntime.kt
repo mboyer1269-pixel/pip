@@ -8,6 +8,7 @@ import ca.michael.pip.acp.DeviceTaskExecutor
 import ca.michael.pip.core.Clock
 import ca.michael.pip.core.acp.AcpHostPolicy
 import ca.michael.pip.core.acp.TaskBroker
+import ca.michael.pip.core.actions.ActionCatalog
 import ca.michael.pip.core.brain.BrainClient
 import ca.michael.pip.core.brain.BrainConfig
 import ca.michael.pip.core.brain.BrainResult
@@ -19,6 +20,9 @@ import ca.michael.pip.core.journal.EventKind
 import ca.michael.pip.journal.FileJournal
 import ca.michael.pip.notebook.NotebookStore
 import ca.michael.pip.security.SecretStore
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
 
@@ -63,18 +67,37 @@ class PipRuntime(private val app: Context) {
 
     private fun brainConfig() = BrainConfig(settings.brainBaseUrl, settings.brainModel, secrets.brainKey() ?: "")
 
+    /** One owner turn and its follow-up rounds with the brain (SPEC 13.3). */
+    data class Turn(val words: String, val messages: List<ChatMessage>, val round: Int = 0)
+
+    private fun localNow(): String =
+        ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm, EEEE, VV", Locale.FRENCH))
+
     /** One brain turn. [onResult] runs on the main thread. */
-    fun askBrain(words: String, snapshot: String?, excerpt: String?, onResult: (BrainResult) -> Unit) {
-        cancelBrain()
+    fun askBrain(words: String, snapshot: String?, excerpt: String?, onResult: (Turn, BrainResult) -> Unit) {
         val past = synchronized(history) { history.toList() }
+        val actions = settings.actionsEnabled
+        val messages = TurnBuilder.messages(past, words, snapshot, excerpt, actionsEnabled = actions, localNow = localNow())
+        submit(Turn(words, messages), onResult)
+    }
+
+    /** Sends the owner's decisions on proposed actions back to the brain, same turn. */
+    fun continueTurn(turn: Turn, assistant: ChatMessage, results: List<Pair<String, String>>, onResult: (Turn, BrainResult) -> Unit) {
+        submit(Turn(turn.words, TurnBuilder.followUp(turn.messages, assistant, results), turn.round + 1), onResult)
+    }
+
+    private fun submit(turn: Turn, onResult: (Turn, BrainResult) -> Unit) {
+        cancelBrain()
+        // Once tool calls are in the history the tool list must stay, so it follows the turn's first choice.
+        val tools = if (settings.actionsEnabled || turn.round > 0) ActionCatalog.tools() else null
         brainTask = brainThread.submit {
-            val result = brain.ask(brainConfig(), TurnBuilder.messages(past, words, snapshot, excerpt))
+            val result = brain.ask(brainConfig(), turn.messages, tools)
             if (result is BrainResult.Answer) synchronized(history) {
-                // History keeps the owner's words only; attachments are never resent.
-                history += ChatMessage("user", words)
+                // History keeps the owner's words and Pip's final answer only; attachments and tool data are never resent.
+                history += ChatMessage("user", turn.words)
                 history += ChatMessage("assistant", result.text)
             }
-            if (!Thread.currentThread().isInterrupted) main.post { onResult(result) }
+            if (!Thread.currentThread().isInterrupted) main.post { onResult(turn, result) }
         }
     }
 

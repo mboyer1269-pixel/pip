@@ -12,9 +12,17 @@ import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.LinearLayout
+import android.widget.RadioButton
+import android.widget.RadioGroup
+import android.widget.ScrollView
 import android.widget.TextView
 import ca.michael.pip.AcpState
+import ca.michael.pip.PipRuntime
 import ca.michael.pip.R
+import ca.michael.pip.actions.DeviceActionRunner
+import ca.michael.pip.core.actions.ActionCatalog
+import ca.michael.pip.core.actions.ActionParse
+import ca.michael.pip.core.actions.DeviceAction
 import ca.michael.pip.VoiceState
 import ca.michael.pip.core.brain.BrainResult
 import ca.michael.pip.core.notebook.ExcerptPicker
@@ -42,6 +50,10 @@ class MainActivity : Activity(), VoiceController.Listener {
     private lateinit var screenToggle: CheckBox
     private lateinit var screenHint: TextView
     private lateinit var voiceIo: VoiceController
+    private lateinit var actions: DeviceActionRunner
+    private var turnGeneration = 0
+    private var openCard: AlertDialog? = null
+    private var permissionCallback: ((Boolean) -> Unit)? = null
 
     /** The snapshot attached to the last turn, shown on request (FR-3.5). */
     private var lastTurnSnapshot: String? = null
@@ -50,6 +62,7 @@ class MainActivity : Activity(), VoiceController.Listener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         voiceIo = VoiceController(this, pip.settings, this)
+        actions = DeviceActionRunner(this)
         val col = Ui.screen(this, R.string.app_name)
 
         face = PipFaceView(this)
@@ -183,6 +196,15 @@ class MainActivity : Activity(), VoiceController.Listener {
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         val granted = grantResults.firstOrNull() == PackageManager.PERMISSION_GRANTED
         when (requestCode) {
+            REQ_ACTION -> {
+                val callback = permissionCallback
+                permissionCallback = null
+                val ok = permissions.isNotEmpty() && permissions.indices.all {
+                    grantResults.getOrNull(it) == PackageManager.PERMISSION_GRANTED ||
+                        permissions[it] == Manifest.permission.ACCESS_FINE_LOCATION // approximate position is enough
+                }
+                callback?.invoke(ok)
+            }
             REQ_MIC -> if (granted) voiceIo.startListening() else pipLine.setText(R.string.err_mic_refused)
             REQ_NOTIFICATIONS -> if (granted) startPip() else {
                 hint.setText(R.string.notif_denied_explain)
@@ -210,6 +232,10 @@ class MainActivity : Activity(), VoiceController.Listener {
 
     private fun runTurn(words: String) {
         if (!pip.state.running) { hint.setText(R.string.pip_off_hint); return }
+        // FR-A.6: a new turn cancels any action card still waiting.
+        turnGeneration++
+        openCard?.dismiss()
+        openCard = null
         youLine.text = getString(R.string.you_label) + " : " + words
         pipLine.text = ""
 
@@ -252,20 +278,145 @@ class MainActivity : Activity(), VoiceController.Listener {
 
     private fun send(words: String, snapshot: String?, excerpt: String?) {
         pip.state.update { voice = VoiceState.THINKING }
-        pip.askBrain(words, snapshot, excerpt) { result ->
-            if (result is BrainResult.Answer) {
-                pipLine.text = getString(R.string.pip_label) + " : " + result.text
-                if (pip.settings.speakAnswers && pip.state.running) {
-                    pip.state.update { voice = VoiceState.SPEAKING }
-                    voiceIo.speak(result.text, TextMatch.looksEnglish(words))
-                } else {
-                    pip.state.update { voice = VoiceState.READY }
+        pip.askBrain(words, snapshot, excerpt, ::onBrain)
+    }
+
+    private fun onBrain(turn: PipRuntime.Turn, result: BrainResult) {
+        when (result) {
+            is BrainResult.Answer -> speakAnswer(turn.words, result.text)
+            is BrainResult.ActionRequest -> {
+                pip.state.update { voice = VoiceState.READY }
+                result.text?.let { pipLine.text = getString(R.string.pip_label) + " : " + it }
+                if (turn.round >= ActionCatalog.MAX_ROUNDS) {
+                    // FR-A.6: no more rounds for this turn.
+                    if (result.text == null) pipLine.setText(R.string.act_round_limit)
+                    return
                 }
-                return@askBrain
+                handleActions(turn, result, turnGeneration)
             }
-            pip.state.update { voice = VoiceState.READY }
-            errorText(result)?.let { pipLine.text = getString(R.string.pip_label) + " : " + it }
+            else -> {
+                pip.state.update { voice = VoiceState.READY }
+                errorText(result)?.let { pipLine.text = getString(R.string.pip_label) + " : " + it }
+            }
         }
+    }
+
+    private fun speakAnswer(words: String, text: String) {
+        pipLine.text = getString(R.string.pip_label) + " : " + text
+        if (pip.settings.speakAnswers && pip.state.running) {
+            pip.state.update { voice = VoiceState.SPEAKING }
+            voiceIo.speak(text, TextMatch.looksEnglish(words))
+        } else {
+            pip.state.update { voice = VoiceState.READY }
+        }
+    }
+
+    // --- Block A: proposed actions, one S10 card each (SPEC 13) ---
+
+    private fun handleActions(turn: PipRuntime.Turn, request: BrainResult.ActionRequest, generation: Int) {
+        val results = mutableListOf<Pair<String, String>>()
+        val calls = request.calls
+        fun next(i: Int) {
+            if (generation != turnGeneration) return // FR-A.6: a new turn cancels what was waiting.
+            if (i == calls.size) {
+                pip.state.update { voice = VoiceState.THINKING }
+                pip.continueTurn(turn, request.assistant, results, ::onBrain)
+                return
+            }
+            val call = calls[i]
+            if (i >= ActionCatalog.MAX_ACTIONS_PER_TURN) {
+                results += call.id to "not shown: at most ${ActionCatalog.MAX_ACTIONS_PER_TURN} actions per turn"
+                next(i + 1)
+                return
+            }
+            when (val parsed = ActionCatalog.parse(call.name, call.argumentsJson)) {
+                is ActionParse.Rejected -> { results += call.id to "rejected: ${parsed.why}"; next(i + 1) }
+                is ActionParse.Ok -> decide(parsed.action, generation) { r -> results += call.id to r; next(i + 1) }
+            }
+        }
+        next(0)
+    }
+
+    private fun decide(action: DeviceAction, generation: Int, done: (String) -> Unit) {
+        withPermissions(actions.preparePermissions(action)) { prepOk ->
+            if (!prepOk) {
+                pipLine.setText(R.string.act_permission_refused)
+                done("permission refused by the owner")
+                return@withPermissions
+            }
+            actions.prepare(action) { prepared ->
+                if (generation != turnGeneration) return@prepare
+                when (prepared) {
+                    is DeviceActionRunner.Prepared.Failed -> {
+                        pipLine.text = getString(R.string.pip_label) + " : " + prepared.ownerMessage
+                        done(prepared.toolResult)
+                    }
+                    is DeviceActionRunner.Prepared.Ready -> showCard(prepared) { approved, choice ->
+                        if (!approved) {
+                            pipLine.setText(R.string.refused)
+                            done("refused by the owner")
+                            return@showCard
+                        }
+                        withPermissions(actions.executePermissions(action)) { granted ->
+                            if (!granted) {
+                                pipLine.setText(R.string.act_permission_refused)
+                                done("permission refused by the owner")
+                            } else {
+                                actions.execute(prepared, choice, done)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /** S10: one action in Pip's words; Approve armed after 1 s; no "always" (FR-A.2, FR-A.3). */
+    private fun showCard(p: DeviceActionRunner.Prepared.Ready, decided: (Boolean, DeviceActionRunner.Contact?) -> Unit) {
+        val pad = Ui.dp(this, 20)
+        val box = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; setPadding(pad, pad, pad, 0) }
+        box.addView(Ui.text(this, p.description))
+        var choice = p.choices.firstOrNull()
+        if (p.choices.size == 1) box.addView(Ui.text(this, p.choices[0].label(), bold = true))
+        if (p.choices.size > 1) {
+            // FR-A.5: the owner picks; the candidate list never reaches the brain.
+            box.addView(Ui.text(this, getString(R.string.act_choose_contact), 14f))
+            box.addView(RadioGroup(this).apply {
+                p.choices.forEachIndexed { i, c -> addView(RadioButton(context).apply { text = c.label(); id = i + 1 }) }
+                check(1)
+                setOnCheckedChangeListener { _, id -> choice = p.choices[id - 1] }
+            })
+        }
+        if (p.action.sendsDataToBrain) box.addView(Ui.text(this, getString(R.string.act_sends_data), 13f))
+        var answered = false
+        val dialog = AlertDialog.Builder(this)
+            .setTitle(R.string.approval_header)
+            .setView(ScrollView(this).apply { addView(box) })
+            .setCancelable(false)
+            .setPositiveButton(R.string.approve) { _, _ -> if (!answered) { answered = true; decided(true, choice) } }
+            .setNegativeButton(R.string.refuse) { _, _ -> if (!answered) { answered = true; decided(false, null) } }
+            .create()
+        dialog.setOnShowListener {
+            val ok = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            ok.filterTouchesWhenObscured = true
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE).filterTouchesWhenObscured = true
+            ok.isEnabled = false
+            ok.postDelayed({ ok.isEnabled = true }, ARM_DELAY_MS)
+        }
+        openCard = dialog
+        dialog.show()
+    }
+
+    /** Asks only what is missing, at the moment of use (FR-A.7). */
+    private fun withPermissions(permissions: List<String>, then: (Boolean) -> Unit) {
+        val coarse = checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+        val missing = permissions.filter {
+            checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED &&
+                !(it == Manifest.permission.ACCESS_FINE_LOCATION && coarse) // approximate position is enough
+        }
+        if (missing.isEmpty()) { then(true); return }
+        permissionCallback = then
+        requestPermissions(missing.toTypedArray(), REQ_ACTION)
     }
 
     /** FR-4.4 / FR-4.5: each failure in its own honest words. */
@@ -281,6 +432,7 @@ class MainActivity : Activity(), VoiceController.Listener {
         BrainResult.Malformed -> getString(R.string.err_malformed)
         BrainResult.Cancelled -> null
         is BrainResult.Answer -> result.text
+        is BrainResult.ActionRequest -> result.text
     }
 
     private fun showSnapshot() {
@@ -295,5 +447,7 @@ class MainActivity : Activity(), VoiceController.Listener {
     companion object {
         private const val REQ_MIC = 1
         private const val REQ_NOTIFICATIONS = 2
+        private const val REQ_ACTION = 3
+        private const val ARM_DELAY_MS = 1_000L
     }
 }
