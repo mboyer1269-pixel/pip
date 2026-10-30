@@ -55,7 +55,6 @@ sleep 3
 adb shell pidof "$pkg" >/dev/null || fail "app process not running after launch"
 echo "ok   launched"
 echo "info home screen: $(ui_labels)"
-echo "info app config: $(adb shell dumpsys activity -p "$pkg" activities | grep -m1 -oE "mLastReportedConfiguration=\{[^ ]+ [^ ]+ [^ ]+ [^ ]+" | tr -d "\r")"
 
 # Push to talk: the assistant gesture arrives as ASSIST; Pip must turn itself on.
 adb shell am start -W -a android.intent.action.ASSIST -n "$pkg/ca.michael.pip.ui.MainActivity" >/dev/null
