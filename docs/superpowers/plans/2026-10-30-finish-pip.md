@@ -233,7 +233,24 @@ was added to the calendar. Three problems came back:
     (`SpeechText`).
   - Test-first: 8 new tests in `SpeechTest`, seen failing to compile and
     then passing; `:core:test` is 56/56.
-- [ ] Design polish: needs the owner's choice of direction (see `BRAND.md`).
+- [x] Design: the owner chose "mockup first". Three screens and a character
+  sheet are published as an artifact. The owner asked for a cuter, rounder
+  Pip with emotions, then validated it.
+- [x] Character and Home rebuilt (`BRAND.md` 5.5 updated at the owner's
+  request):
+  - `PipFaceView` draws the new Pip: round, chubby, shiny eyes, cheeks,
+    mouth, arms.
+  - Ten moods drive the face: ready, hello, tickled, listening, thinking,
+    speaking, waiting, success, oops, asleep. They come with breathing,
+    blinking, talking, a dance and a floating "z".
+  - Home follows the mockup:
+    - a header with Pip's state and a settings button;
+    - an indigo hero card with the on/off button and the indicators;
+    - a conversation card, rounded chips and a rounded input with a send
+      button;
+    - the big pocket-shaped « Parler » button with a microphone icon.
+  - `Ui` gives every screen rounded buttons with touch feedback and a cream
+    ground. The S10 card opens as a rounded panel from the bottom.
 
 ## Out of scope (stated, not built)
 

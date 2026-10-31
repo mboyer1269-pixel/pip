@@ -201,12 +201,21 @@ echo "ok   drag moved the bubble ($bubble_xy -> $moved) without opening Pip"
 # Long press (FR-B.6): with accessibility on, Pip reads the app underneath and opens.
 adb shell settings put secure enabled_accessibility_services "$pkg/ca.michael.pip.screen.PipAccessibilityService"
 adb shell settings put secure accessibility_enabled 1
-sleep 3
+bound=no
+for i in $(seq 1 20); do
+  a11y="$(adb shell dumpsys accessibility)"
+  if grep -E "Bound services:" <<<"$a11y" | grep -q "Pip"; then bound=yes; break; fi
+  sleep 1
+done
+[ "$bound" = yes ] || { grep -E "Bound services|Enabled services" <<<"$a11y" || true; fail "Pip's accessibility service never bound"; }
+echo "ok   accessibility service bound"
+sleep 1
 set -- $moved
 adb shell input swipe "$1" "$2" "$1" "$2" 1500
 # Proof of the capture: « Voir ce que j'ai lu » only shows when this turn holds a
 # snapshot (the « J'ai lu l'écran… » line is soon replaced by the voice outcome).
-wait_text "Voir ce que j'ai lu" \
+sleep 2
+scroll_to_text "Voir ce que j'ai lu" \
   || { ui_labels; fail "long press on the bubble did not read the screen"; }
 echo "ok   long press read the app underneath and opened Pip"
 
