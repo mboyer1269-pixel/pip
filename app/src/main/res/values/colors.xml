@@ -8,4 +8,13 @@
     <color name="pip_sprout">#2FA36B</color>
     <color name="pip_ink">#1A1D33</color>
     <color name="pip_coral_alert">#E5484D</color>
+    <!-- Pip's character (BRAND.md 5.1, 2026-10-30 owner update) -->
+    <color name="pip_seed_light">#9A6A44</color>
+    <color name="pip_blush">#FF8F7A</color>
+    <color name="pip_eye_white">#FFFFFF</color>
+    <!-- Surfaces (Home redesign) -->
+    <color name="pip_card">#FFFFFF</color>
+    <color name="pip_line">#E6D9C8</color>
+    <color name="pip_muted">#5A5F7A</color>
+    <color name="pip_chip_line">#D8CBE8</color>
 </resources>

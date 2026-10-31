@@ -263,4 +263,7 @@
         <item>I grow a little every day.</item>
     </string-array>
     <string name="lock_screen_line">Pip has something for you.</string>
+    <!-- Home redesign: state pill in the header -->
+    <string name="state_on_pill">On</string>
+    <string name="state_off_pill">Asleep</string>
 </resources>

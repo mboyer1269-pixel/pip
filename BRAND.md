@@ -286,6 +286,8 @@ other detail.
   by one eye width; leaf ≈ 35 % of seed width, tilted about 30°.
 - Seed, eyes and leaf together are what makes it Pip; the mark is never
   used as an empty pocket.
+- This minimal mark is for icons. On Home, Pip is the fuller character of
+  5.5 (owner update, 2026-10-30).
 
 ### 5.2 Palette
 
@@ -330,23 +332,35 @@ risk to check on a device in Phase 5 (fallback: drop the leaf, keep the
 pocket). The state is carried by the notification text (S1), not by the
 icon.
 
-### 5.5 Pip's face on Home (S2)
+### 5.5 Pip's character on Home (S2)
 
-The eyes, the leaf, and the seed's height in the pocket are the only
-animated parts.
+**Owner update, 2026-10-30.** The owner asked for more charisma: a round,
+chubby, cute Pip that reacts to touch and shows emotions. On Home, Pip is no
+longer the minimal mark of 5.1. It is a character:
+- a round, chubby seed with a lighter highlight on its top;
+- big shiny eyes (white, with a dark pupil and a highlight), rosy cheeks and
+  a small mouth;
+- two little round arms, and its leaf on a short stem;
+- it lives in its pocket, which sits in front of its body.
 
-| State | Animation |
-|---|---|
-| Ready | Eyes open, slow blink every few seconds |
-| Listening | Pupils slightly larger, seed rises a little |
-| Thinking | Eyes look up, leaf sways gently |
-| Speaking | Gentle bounce of the seed |
-| Waiting for approval | Eyes look at the approval button |
-| Success | One wink, leaf perks up |
-| Error | Eyes half-closed, leaf droops, no motion |
-| Stopping | Seed slides down into the pocket |
+The launcher icon and the notification icon keep the simple mark of 5.1, so
+they stay readable at small sizes.
 
-Animations respect the system "remove animations" setting.
+| Mood | When | Pose |
+|---|---|---|
+| Ready | idle | arms resting on the pocket edge, slow breathing, blinks |
+| Hello | Home opens | one eye winks, one hand waves |
+| Tickled | tap on Pip | squishes a little, happy closed eyes, laughs, sparkles |
+| Listening | mic open | rises out of the pocket, bigger eyes, hand cupped at its ear |
+| Thinking | waiting for the brain | eyes look up, leaf sways, hand under its chin |
+| Speaking | reading an answer aloud | mouth opens and closes, blinks |
+| Waiting | an approval card is open | eyes look down toward the buttons, hands together |
+| Success | an approved action ran | both arms up, little dance, sparkles |
+| Oops | an error, or a voice failure | leaf droops, worried brows, small frown |
+| Asleep | Pip is off | sinks into the pocket, eyes closed, floating "z" |
+
+Animations respect the system "remove animations" setting: with it, each mood
+is a still pose.
 
 ### 5.6 Type and shape
 

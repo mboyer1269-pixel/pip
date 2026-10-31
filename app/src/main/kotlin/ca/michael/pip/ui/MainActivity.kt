@@ -5,7 +5,9 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
+import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
@@ -39,6 +41,7 @@ import ca.michael.pip.voice.VoiceController
 class MainActivity : Activity(), VoiceController.Listener {
     private lateinit var face: PipFaceView
     private lateinit var onOff: Button
+    private lateinit var statePill: TextView
     private lateinit var hint: TextView
     private lateinit var indicators: TextView
     private lateinit var orchestratorLine: TextView
@@ -64,6 +67,10 @@ class MainActivity : Activity(), VoiceController.Listener {
     private var pendingSnapshot: String? = null
     /** Pip's face winks until this time (fun pack: success, tap on the face). */
     private var winkUntil = 0L
+    /** Pip laughs after a tap on the face, and waves hello when the screen opens. */
+    private var tickleUntil = 0L
+    private var helloUntil = 0L
+    private var oopsUntil = 0L
 
     private val onState: () -> Unit = {
         render()
@@ -78,58 +85,102 @@ class MainActivity : Activity(), VoiceController.Listener {
         voiceIo = VoiceController(this, pip.settings, this)
         actions = DeviceActionRunner(this)
         val col = Ui.screen(this, R.string.app_name)
+        val cream = getColor(R.color.pip_cream)
 
+        // Header: name, on/off state, settings.
+        val title = Ui.text(this, getString(R.string.app_name), 22f, bold = true).apply { setTextColor(getColor(R.color.pip_indigo)) }
+        statePill = Ui.pill(this, "", R.color.pip_card, R.color.pip_ink)
+        val header = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            addView(title)
+            addView(statePill, LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply { marginStart = Ui.dp(context, 10) })
+            addView(View(context), LinearLayout.LayoutParams(0, 1, 1f))
+            addView(Ui.iconButton(context, R.drawable.ic_settings, getString(R.string.nav_settings), R.color.pip_card, R.color.pip_indigo) {
+                open(BrainSettingsActivity::class.java)
+            }, LinearLayout.LayoutParams(Ui.dp(context, 48), Ui.dp(context, 48)))
+        }
+        col.addView(header)
+
+        // Hero card: Pip, the greeting, on/off and the indicators.
+        val hero = Ui.card(this, R.color.pip_indigo, 28, 20).apply { gravity = Gravity.CENTER_HORIZONTAL }
         face = PipFaceView(this).apply {
             contentDescription = getString(R.string.face_desc)
             setOnClickListener { onFaceTapped() }
         }
-        col.addView(face, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, Ui.dp(this, 170)))
-        col.addView(Ui.text(this, Fun.greeting(this)))
-        onOff = Ui.button(this, "") { toggleRunning() }.also { col.addView(it) }
-        hint = Ui.text(this, "", 14f).also { col.addView(it) }
-        indicators = Ui.text(this, "", 14f).also { col.addView(it) }
-        orchestratorLine = Ui.text(this, "", 15f, bold = true).also { col.addView(it) }
+        hero.addView(face, Ui.full(this, heightDp = 190))
+        hero.addView(Ui.text(this, Fun.greeting(this), 18f).apply { setTextColor(cream); gravity = Gravity.CENTER })
+        onOff = Ui.button(this, "", Ui.Style.PRIMARY) { toggleRunning() }
+        hero.addView(onOff, LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply { topMargin = Ui.dp(this@MainActivity, 8) })
+        hint = Ui.text(this, "", 14f).apply { setTextColor(cream); gravity = Gravity.CENTER }.also { hero.addView(it) }
+        indicators = Ui.text(this, "", 12f).apply { setTextColor(getColor(R.color.pip_cream)); alpha = 0.85f; gravity = Gravity.CENTER }.also { hero.addView(it) }
+        orchestratorLine = Ui.text(this, "", 15f, bold = true).apply { setTextColor(cream) }.also { hero.addView(it) }
+        col.addView(hero, Ui.full(this, 12))
 
-        col.addView(Ui.spacer(this))
-        youLine = Ui.text(this, "").also { col.addView(it) }
-        pipLine = Ui.text(this, "").also { col.addView(it) }
-        seeSnapshot = Ui.button(this, getString(R.string.see_snapshot)) { showSnapshot() }.also { col.addView(it) }
-
-        talk = Ui.button(this, getString(R.string.talk), Ui.Style.PRIMARY) { onTalk() }.also {
-            col.addView(it, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, Ui.dp(this, 72)))
-        }
-        interrupt = Ui.button(this, getString(R.string.interrupt)) { voiceIo.stopSpeaking() }.also { col.addView(it) }
+        // Conversation card.
+        val talkCard = Ui.card(this)
+        youLine = Ui.text(this, "", 14f).apply { setTextColor(getColor(R.color.pip_muted)) }.also { talkCard.addView(it) }
+        pipLine = Ui.text(this, "").also { talkCard.addView(it) }
+        seeSnapshot = Ui.button(this, getString(R.string.see_snapshot)) { showSnapshot() }.also { talkCard.addView(it, Ui.full(this, 8)) }
+        interrupt = Ui.button(this, getString(R.string.interrupt)) { voiceIo.stopSpeaking() }.also { talkCard.addView(it, Ui.full(this, 8)) }
+        col.addView(talkCard, Ui.full(this, 14))
 
         // Suggestion chips: each one only starts a normal turn (actions still go through S10).
         val chips = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
         for (res in Fun.CHIPS) {
-            chips.addView(Ui.button(this, getString(res)) { runTurn(getString(res)) })
+            chips.addView(Ui.button(this, getString(res)) { runTurn(getString(res)) }.apply {
+                background = Ui.touchable(context, Ui.shape(context, R.color.pip_card, 999, R.color.pip_chip_line, 2))
+                setTypeface(typeface, android.graphics.Typeface.NORMAL)
+            }, LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply { marginEnd = Ui.dp(this@MainActivity, 8) })
         }
-        col.addView(HorizontalScrollView(this).apply { addView(chips) })
+        col.addView(HorizontalScrollView(this).apply { isHorizontalScrollBarEnabled = false; addView(chips) }, Ui.full(this, 14))
 
-        input = EditText(this).apply { setHint(R.string.type_hint) }
-        col.addView(Ui.row(this, input))
-        col.addView(Ui.button(this, getString(R.string.send)) {
+        // Type a message.
+        input = EditText(this).apply {
+            setHint(R.string.type_hint)
+            background = Ui.shape(context, R.color.pip_card, 16, R.color.pip_line, 2)
+            setPadding(Ui.dp(context, 16), 0, Ui.dp(context, 16), 0)
+            minHeight = Ui.dp(context, 48)
+        }
+        val send = Ui.iconButton(this, R.drawable.ic_send, getString(R.string.send), R.color.pip_indigo, R.color.pip_cream) {
             val words = input.text.toString().trim()
             if (words.isNotEmpty()) { input.setText(""); runTurn(words) }
-        })
+        }
+        col.addView(LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            addView(input, LinearLayout.LayoutParams(0, Ui.dp(context, 48), 1f))
+            addView(send, LinearLayout.LayoutParams(Ui.dp(context, 48), Ui.dp(context, 48)).apply { marginStart = Ui.dp(context, 8) })
+        }, Ui.full(this, 14))
 
-        screenToggle = CheckBox(this).apply { setText(R.string.screen_toggle) }.also { col.addView(it) }
-        screenHint = Ui.text(this, getString(R.string.screen_toggle_off_hint), 13f).also { col.addView(it) }
+        screenToggle = CheckBox(this).apply { setText(R.string.screen_toggle) }.also { col.addView(it, Ui.full(this, 6)) }
+        screenHint = Ui.text(this, getString(R.string.screen_toggle_off_hint), 13f).apply { setTextColor(getColor(R.color.pip_muted)) }.also { col.addView(it) }
 
-        col.addView(Ui.spacer(this))
+        // Talk: the big pocket-shaped button (BRAND.md 5.6).
+        talk = Ui.button(this, getString(R.string.talk), Ui.Style.PRIMARY) { onTalk() }.apply {
+            textSize = 20f
+            background = Ui.touchable(context, GradientDrawable().apply {
+                setColor(getColor(R.color.pip_clementine))
+                val t = Ui.dp(context, 26).toFloat(); val b = Ui.dp(context, 36).toFloat()
+                cornerRadii = floatArrayOf(t, t, t, t, b, b, b, b)
+            })
+            setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_mic, 0, 0, 0)
+            compoundDrawableTintList = android.content.res.ColorStateList.valueOf(getColor(R.color.pip_ink))
+            compoundDrawablePadding = Ui.dp(context, 10)
+            elevation = Ui.dp(context, 4).toFloat()
+        }
+        col.addView(talk, Ui.full(this, 12, 72))
+
+        // Other screens.
         col.addView(Ui.row(this,
-            Ui.button(this, getString(R.string.nav_settings)) { open(BrainSettingsActivity::class.java) },
             Ui.button(this, getString(R.string.nav_notebook)) { open(NotebookActivity::class.java) },
-        ))
-        col.addView(Ui.row(this,
             Ui.button(this, getString(R.string.nav_tasks)) { open(TaskApprovalActivity::class.java) },
             Ui.button(this, getString(R.string.nav_journal)) { open(JournalActivity::class.java) },
-        ))
+        ), Ui.full(this, 16))
         col.addView(Ui.row(this,
             Ui.button(this, getString(R.string.nav_acp)) { open(AcpSettingsActivity::class.java) },
             Ui.button(this, getString(R.string.nav_setup)) { open(SetupActivity::class.java) },
-        ))
+        ), Ui.full(this, 8))
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -140,6 +191,8 @@ class MainActivity : Activity(), VoiceController.Listener {
     override fun onResume() {
         super.onResume()
         pip.state.addListener(onState)
+        helloUntil = System.currentTimeMillis() + 2_000
+        face.postDelayed({ render() }, 2_050)
         render()
         consumeGesture()
     }
@@ -203,13 +256,14 @@ class MainActivity : Activity(), VoiceController.Listener {
             }
         }
         onOff.setText(if (s.running) R.string.turn_off else R.string.turn_on)
+        statePill.setText(if (s.running) R.string.state_on_pill else R.string.state_off_pill)
         hint.text = if (s.running) "" else getString(R.string.pip_off_hint)
         val a11y = PipAccessibilityService.isOn()
         indicators.text = listOf(
             getString(if (pip.brainConfigured()) R.string.indicator_brain_ready else R.string.indicator_brain_missing),
             getString(if (a11y) R.string.indicator_screen_on else R.string.indicator_screen_off),
             getString(if (s.acp == AcpState.CONNECTED) R.string.acp_connected else R.string.acp_off),
-        ).joinToString("\n")
+        ).joinToString("  ·  ")
         orchestratorLine.text = s.orchestratorMessage?.let { getString(R.string.orchestrator_message, it) } ?: ""
         screenToggle.isEnabled = a11y && s.running
         if (!a11y) screenToggle.isChecked = false
@@ -218,13 +272,17 @@ class MainActivity : Activity(), VoiceController.Listener {
         talk.isEnabled = s.running
         talk.setText(if (s.voice == VoiceState.LISTENING) R.string.talk_listening else R.string.talk)
         interrupt.visibility = if (s.voice == VoiceState.SPEAKING) View.VISIBLE else View.GONE
+        val now = System.currentTimeMillis()
         face.mood = when {
-            System.currentTimeMillis() < winkUntil -> PipFaceView.Mood.SUCCESS
-            !s.running -> PipFaceView.Mood.STOPPING
+            now < tickleUntil -> PipFaceView.Mood.TICKLED
+            now < winkUntil -> PipFaceView.Mood.SUCCESS
+            !s.running -> PipFaceView.Mood.SLEEP
+            now < helloUntil -> PipFaceView.Mood.HELLO
             pip.broker.pending().isNotEmpty() -> PipFaceView.Mood.WAITING
             s.voice == VoiceState.LISTENING -> PipFaceView.Mood.LISTENING
             s.voice == VoiceState.THINKING -> PipFaceView.Mood.THINKING
             s.voice == VoiceState.SPEAKING -> PipFaceView.Mood.SPEAKING
+            now < oopsUntil -> PipFaceView.Mood.ERROR
             else -> PipFaceView.Mood.READY
         }
     }
@@ -292,6 +350,7 @@ class MainActivity : Activity(), VoiceController.Listener {
     override fun onVoiceError(messageRes: Int) {
         pip.state.update { voice = VoiceState.READY }
         pipLine.text = getString(R.string.pip_label) + " : " + getString(messageRes)
+        oops()
     }
 
     override fun onSpeaking() = pip.state.update { voice = VoiceState.SPEAKING }
@@ -372,6 +431,7 @@ class MainActivity : Activity(), VoiceController.Listener {
             else -> {
                 pip.state.update { voice = VoiceState.READY }
                 errorText(result)?.let { pipLine.text = getString(R.string.pip_label) + " : " + it }
+                if (result !is BrainResult.Answer && result !is BrainResult.ActionRequest && result != BrainResult.Cancelled) oops()
             }
         }
     }
@@ -485,6 +545,12 @@ class MainActivity : Activity(), VoiceController.Listener {
         }
         openCard = dialog
         dialog.show()
+        // Shown as a rounded panel rising from the bottom, like a pocket opening.
+        dialog.window?.apply {
+            setBackgroundDrawable(Ui.shape(this@MainActivity, R.color.pip_cream, 28))
+            setGravity(Gravity.BOTTOM)
+            setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
+        }
     }
 
     /** Asks only what is missing, at the moment of use (FR-A.7). */
@@ -507,8 +573,17 @@ class MainActivity : Activity(), VoiceController.Listener {
         face.postDelayed({ render() }, ms + 50)
     }
 
+    /** Pip looks sorry for a moment after something went wrong. */
+    private fun oops() {
+        oopsUntil = System.currentTimeMillis() + 2_500
+        render()
+        face.postDelayed({ render() }, 2_550)
+    }
+
     private fun onFaceTapped() {
-        wink(1_200)
+        tickleUntil = System.currentTimeMillis() + 1_200
+        render()
+        face.postDelayed({ render() }, 1_250)
         pipLine.text = getString(R.string.pip_label) + " : " + Fun.quip(this)
     }
 

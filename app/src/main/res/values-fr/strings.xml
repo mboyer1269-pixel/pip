@@ -275,4 +275,7 @@
         <item>Je pousse un peu chaque jour.</item>
     </string-array>
     <string name="lock_screen_line">Pip a quelque chose pour toi.</string>
+    <!-- Home redesign: state pill in the header -->
+    <string name="state_on_pill">Allumé</string>
+    <string name="state_off_pill">Endormi</string>
 </resources>
